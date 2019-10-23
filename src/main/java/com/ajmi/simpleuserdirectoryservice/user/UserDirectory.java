@@ -1,5 +1,8 @@
 package com.ajmi.simpleuserdirectoryservice.user;
 
+/**
+ * Directory containing the user names, emails, scree names, and passwords of users.
+ */
 public interface UserDirectory {
 
     /**
