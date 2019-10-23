@@ -1,4 +1,4 @@
 package com.ajmi.simpleuserdirectoryservice.user;
 
-public class UserDirectory {
+public interface UserDirectory {
 }
