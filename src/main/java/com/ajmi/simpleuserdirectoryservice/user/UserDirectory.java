@@ -7,9 +7,21 @@ public interface UserDirectory {
 
     /**
      * Checks if the specified user exists in the directory.
-     * @param username of the user to check for.
-     * @return true if the user was found in the directory, false otherwise.
+     * @param username User name of the user to check for.
+     * @return Returns true if the user was found in the directory, false otherwise.
      */
     boolean has(String username);
+
+    /**
+     * Tries to add a user to the directory with the given user name, email, screen name, and password.
+     * @param username User name of the new entry.
+     * @param email Email of the new entry.
+     * @param screeName Screen name of the new entry.
+     * @param password Password of the new entry.
+     * @return Returns true if the the the entry was successfully added, false otherwise.
+     */
+    boolean add(String username, String email, String screeName, String password);
+
+
 
 }
