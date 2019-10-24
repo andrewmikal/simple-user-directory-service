@@ -15,7 +15,7 @@ import static junit.framework.TestCase.assertTrue;
 /**
  * Tests for the UserDirectory interface.
  */
-public class TestUserDirectory {
+public abstract class TestUserDirectory {
 
     /** Used to format current time when creating new entries in the UserDirectory. */
     private static final DateTimeFormatter formatter = DateTimeFormatter
@@ -27,13 +27,7 @@ public class TestUserDirectory {
      * Creates a new user directory.
      * @return a new UserDirectory object.
      */
-    private static UserDirectory create() {
-        return new UserDirectory() {
-            public boolean has(String username) {
-                return false;
-            }
-        };
-    }
+    protected abstract UserDirectory create();
 
     /**
      * Checks that has() returns true when the specified user does not exist in the directory.
