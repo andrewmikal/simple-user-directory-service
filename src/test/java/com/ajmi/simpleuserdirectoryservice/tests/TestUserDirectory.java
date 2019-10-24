@@ -30,12 +30,34 @@ public abstract class TestUserDirectory {
     protected abstract UserDirectory create();
 
     /**
-     * Checks that hasUser() returns true when the specified user does not exist in the directory.
+     * Creates a username created from the current time.
+     * @return a String to use as a username based on the current time.
+     */
+    private static String username() {
+        return "TestUserDirectory-Username:"+formatter.format(Instant.now());
+    }
+
+    /**
+     * Tests the hasUser() method when the user does not exist in the directory.
      */
     @Test
     public void testHasUserDNE() {
         UserDirectory ud = create();
         // check if the directory hasUser a user that doesn't exist
-        assertFalse(ud.hasUser(formatter.format(Instant.now())));
+        assertFalse(ud.hasUser(username()));
+    }
+
+    /**
+     * Tests the addUser() method when the user does not already exist in the directory and the hasUser() method when
+     *  the user is added to the directory.
+     */
+    @Test
+    public void testAddUserHasUser() {
+        UserDirectory ud = create();
+        String uname = username();
+
+        assertFalse(ud.hasUser(uname));
+        assertTrue(ud.addUser(uname, "foo", "bar", "baz"));
+        assertTrue(ud.hasUser(uname));
     }
 }
