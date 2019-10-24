@@ -30,12 +30,12 @@ public abstract class TestUserDirectory {
     protected abstract UserDirectory create();
 
     /**
-     * Checks that has() returns true when the specified user does not exist in the directory.
+     * Checks that hasUser() returns true when the specified user does not exist in the directory.
      */
     @Test
     public void testHasDNE() {
         UserDirectory ud = create();
-        // check if the directory has a user that doesn't exist
-        assertFalse(ud.has(formatter.format(Instant.now())));
+        // check if the directory hasUser a user that doesn't exist
+        assertFalse(ud.hasUser(formatter.format(Instant.now())));
     }
 }

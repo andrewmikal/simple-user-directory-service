@@ -10,7 +10,7 @@ public interface UserDirectory {
      * @param username User name of the user to check for.
      * @return Returns true if the user was found in the directory, false otherwise.
      */
-    boolean has(String username);
+    boolean hasUser(String username);
 
     /**
      * Tries to add a user to the directory with the given user name, email, screen name, and password.
@@ -20,7 +20,7 @@ public interface UserDirectory {
      * @param password Password of the new entry.
      * @return Returns true if the the the entry was successfully added, false otherwise.
      */
-    boolean add(String username, String email, String screeName, String password);
+    boolean addUser(String username, String email, String screeName, String password);
 
 
 
