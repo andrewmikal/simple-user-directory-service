@@ -9,6 +9,7 @@ import java.time.format.DateTimeFormatter;
 import java.time.format.FormatStyle;
 import java.util.Locale;
 
+import static junit.framework.TestCase.assertEquals;
 import static junit.framework.TestCase.assertFalse;
 import static junit.framework.TestCase.assertTrue;
 
@@ -82,5 +83,18 @@ public abstract class TestUserDirectory {
         assertTrue(ud.hasUser(uname));
         assertTrue(ud.removeUser(uname));
         assertFalse(ud.hasUser(uname));
+    }
+
+    /**
+     * Tests the getUsers() method.
+     */
+    @Test
+    public void testGetUsers() {
+        UserDirectory ud = create();
+        String[] usernames = {username(), username(), username(), username(), username()};
+        for (String name : usernames) {
+            ud.addUser(name, "foo", "bar", "baz");
+        }
+        assertEquals(usernames, ud.getUsers());
     }
 }
