@@ -22,6 +22,11 @@ public interface UserDirectory {
      */
     boolean addUser(String username, String email, String screeName, String password);
 
-
-
+    /**
+     * Tries to remove the user with the given user name from the directory.
+     * @param username User name of the user to remove.
+     * @return Returns true if the user was removed, false if the user did not exist or could not be removed.
+     */
+    boolean removeUser(String username);
+    
 }
