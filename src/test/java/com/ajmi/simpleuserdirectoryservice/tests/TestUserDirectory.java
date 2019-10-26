@@ -60,4 +60,27 @@ public abstract class TestUserDirectory {
         assertTrue(ud.addUser(uname, "foo", "bar", "baz"));
         assertTrue(ud.hasUser(uname));
     }
+
+    /**
+     * Tests the removeUser() method when the user does not exist in the directory.
+     */
+    @Test
+    public void testRemoveUserDNE() {
+        UserDirectory ud = create();
+        assertFalse(ud.removeUser(username()));
+    }
+
+    /**
+     * Tests the removeUser() method when the user exists in the directory.
+     */
+    @Test
+    public void testRemoveUserExists() {
+        UserDirectory ud = create();
+        String uname = username();
+        ud.addUser(uname, "foo", "bar", "baz");
+
+        assertTrue(ud.hasUser(uname));
+        assertTrue(ud.removeUser(uname));
+        assertFalse(ud.hasUser(uname));
+    }
 }

@@ -28,5 +28,5 @@ public interface UserDirectory {
      * @return Returns true if the user was removed, false if the user did not exist or could not be removed.
      */
     boolean removeUser(String username);
-    
+
 }
