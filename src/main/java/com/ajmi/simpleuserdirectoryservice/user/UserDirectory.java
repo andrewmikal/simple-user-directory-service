@@ -29,4 +29,10 @@ public interface UserDirectory {
      */
     boolean removeUser(String username);
 
+    /**
+     * Retrieves a list of all the user names of users in the directory
+     * @return Returns an array of strings, containing all users' user names.
+     */
+    String[] getUsers();
+
 }
