@@ -20,12 +20,7 @@ public interface UserDirectory {
      * @param password Password of the new entry.
      * @return Returns true if the the the entry was successfully added, false otherwise.
      */
-    boolean addUser(String username, String email, String screeName, String password) throws
-            UserAlreadyExistsException,
-            InvalidEmailException,
-            InvalidPasswordException,
-            InvalidScreenNameException,
-            InvalidUsernameException;
+    boolean addUser(String username, String email, String screeName, String password) throws UserAlreadyExistsException, PolicyFailureException;
 
     /**
      * Tries to remove the user with the given user name from the directory.

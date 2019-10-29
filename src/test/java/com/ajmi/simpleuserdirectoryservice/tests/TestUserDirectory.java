@@ -1,6 +1,9 @@
 package com.ajmi.simpleuserdirectoryservice.tests;
 
+import com.ajmi.simpleuserdirectoryservice.user.PolicyFailureException;
+import com.ajmi.simpleuserdirectoryservice.user.UserAlreadyExistsException;
 import com.ajmi.simpleuserdirectoryservice.user.UserDirectory;
+import com.ajmi.simpleuserdirectoryservice.user.UserDirectoryException;
 import org.junit.Test;
 
 import java.time.Instant;
@@ -9,9 +12,7 @@ import java.time.format.DateTimeFormatter;
 import java.time.format.FormatStyle;
 import java.util.Locale;
 
-import static junit.framework.TestCase.assertEquals;
-import static junit.framework.TestCase.assertFalse;
-import static junit.framework.TestCase.assertTrue;
+import static junit.framework.TestCase.*;
 
 /**
  * Tests for the UserDirectory interface.
@@ -58,7 +59,12 @@ public abstract class TestUserDirectory {
         String uname = username();
 
         assertFalse(ud.hasUser(uname));
-        assertTrue(ud.addUser(uname, "foo", "bar", "baz"));
+        try {
+            assertTrue(ud.addUser(uname, "foo", "bar", "baz"));
+        } catch (UserDirectoryException e) {
+            // unexpected exception
+            fail();
+        }
         assertTrue(ud.hasUser(uname));
     }
 
@@ -78,7 +84,12 @@ public abstract class TestUserDirectory {
     public void testRemoveUserExists() {
         UserDirectory ud = create();
         String uname = username();
-        ud.addUser(uname, "foo", "bar", "baz");
+        try {
+            ud.addUser(uname, "foo", "bar", "baz");
+        } catch (UserDirectoryException e) {
+            // unexpected exception
+            fail();
+        }
 
         assertTrue(ud.hasUser(uname));
         assertTrue(ud.removeUser(uname));
@@ -93,7 +104,12 @@ public abstract class TestUserDirectory {
         UserDirectory ud = create();
         String[] usernames = {username(), username(), username(), username(), username()};
         for (String name : usernames) {
-            ud.addUser(name, "foo", "bar", "baz");
+            try {
+                ud.addUser(name, "foo", "bar", "baz");
+            } catch (UserDirectoryException e) {
+                // unexpected exception
+                fail();
+            }
         }
         assertEquals(usernames, ud.getUsers());
     }
