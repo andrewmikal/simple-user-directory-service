@@ -18,9 +18,8 @@ public interface UserDirectory {
      * @param email Email of the new entry.
      * @param screeName Screen name of the new entry.
      * @param password Password of the new entry.
-     * @return Returns true if the the the entry was successfully added, false otherwise.
      */
-    boolean addUser(String username, String email, String screeName, String password) throws UserAlreadyExistsException, PolicyFailureException;
+    void addUser(String username, String email, String screeName, String password) throws UserAlreadyExistsException, PolicyFailureException;
 
     /**
      * Tries to remove the user with the given user name from the directory.

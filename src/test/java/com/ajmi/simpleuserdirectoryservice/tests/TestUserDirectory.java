@@ -60,7 +60,9 @@ public abstract class TestUserDirectory {
 
         assertFalse(ud.hasUser(uname));
         try {
-            assertTrue(ud.addUser(uname, "foo", "bar", "baz"));
+            ud.addUser(uname, "foo", "bar", "baz");
+        } catch (UserAlreadyExistsException e) {
+            // expected exception
         } catch (UserDirectoryException e) {
             // unexpected exception
             fail();
