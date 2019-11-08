@@ -48,4 +48,11 @@ public interface UserDirectory {
      */
     boolean authenticateUser(String username, String password);
 
+    /**
+     * Retrieve data on the specified user.
+     * @param username Username of the user to retrieve data on.
+     * @return Returns a UserData object containing the user's data.
+     */
+    UserData getUserData(String username);
+
 }
