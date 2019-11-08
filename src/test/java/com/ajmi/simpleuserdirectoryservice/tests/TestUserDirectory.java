@@ -126,10 +126,10 @@ public abstract class TestUserDirectory {
     }
 
     /**
-     * Test validateUser().
+     * Test authenticateUser().
      */
     @Test
-    public void testValidateUser() {
+    public void testAuthenticateUser() {
         UserDirectory ud = create();
 
         // create user
@@ -143,14 +143,14 @@ public abstract class TestUserDirectory {
         }
 
         // test method when valid
-        assertTrue(ud.validateUser(user, pass));
+        assertTrue(ud.authenticateUser(user, pass));
 
         // test method when invalid
-        assertFalse(ud.validateUser(user, "wrong pass"));
+        assertFalse(ud.authenticateUser(user, "wrong pass"));
 
         // test method when user doesn't exist
         String dneUser = "this-user-doesn't-exist"+username();
         assertFalse(ud.hasUser(dneUser));
-        assertFalse(ud.validateUser(dneUser, pass));
+        assertFalse(ud.authenticateUser(dneUser, pass));
     }
 }

@@ -42,10 +42,10 @@ public interface UserDirectory {
 
     /**
      * Validate that the given username matches the given password in the user directory.
-     * @param username Username of user to validate.
-     * @param password Password used to validate the user.
+     * @param username Username of user to authenticate.
+     * @param password Password used to authenticate the user.
      * @return Returns true if the username and password combination is valid, false otherwise.
      */
-    boolean validateUser(String username, String password);
+    boolean authenticateUser(String username, String password);
 
 }
