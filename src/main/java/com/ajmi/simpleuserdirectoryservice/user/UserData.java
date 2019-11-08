@@ -23,4 +23,28 @@ public class UserData {
         _email = email;
         _screenName = screenName;
     }
+
+    /**
+     * Get the username of the user.
+     * @return Return the user's username.
+     */
+    public String getUsername() {
+        return _username;
+    }
+
+    /**
+     * Get the email of the user.
+     * @return Return the user's email.
+     */
+    public String getEmail() {
+        return _email;
+    }
+
+    /**
+     * Get the screen name of the user.
+     * @return Return the user's screen name.
+     */
+    public String getScreenName() {
+        return _screenName;
+    }
 }
