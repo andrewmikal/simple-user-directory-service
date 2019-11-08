@@ -47,4 +47,22 @@ public class UserData {
     public String getScreenName() {
         return _screenName;
     }
+
+    /**
+     * Checks if this UserData object has the same user information as another object.
+     * @param obj Object to check for the same user information.
+     * @return Returns true if both objects have the same user information, false if not, or if one isn't a UserData.
+     */
+    @Override
+    public boolean equals(Object obj) {
+        if (obj instanceof UserData) {
+            UserData that = (UserData) obj;
+            // equal if username, email, and screen name are equal
+            return _username.equals(that._username) &&
+                    _email.equals(that._email) &&
+                    _screenName.equals(that._screenName);
+        }
+        // not equal if obj is not a UserData
+        return false;
+    }
 }
