@@ -1,9 +1,6 @@
 package com.ajmi.simpleuserdirectoryservice.tests;
 
-import com.ajmi.simpleuserdirectoryservice.user.PolicyFailureException;
-import com.ajmi.simpleuserdirectoryservice.user.UserAlreadyExistsException;
-import com.ajmi.simpleuserdirectoryservice.user.UserDirectory;
-import com.ajmi.simpleuserdirectoryservice.user.UserDirectoryException;
+import com.ajmi.simpleuserdirectoryservice.user.*;
 import org.junit.Test;
 
 import java.time.Instant;
@@ -152,5 +149,26 @@ public abstract class TestUserDirectory {
         String dneUser = "this-user-doesn't-exist"+username();
         assertFalse(ud.hasUser(dneUser));
         assertFalse(ud.authenticateUser(dneUser, pass));
+    }
+
+    /**
+     * Tests getUserData().
+     */
+    @Test
+    public void testGetUserData() {
+        UserDirectory ud = create();
+
+        String user = username();
+        String email = "foo";
+        String screen = "bar";
+
+        try {
+            ud.addUser(user, email, screen, "baz");
+        } catch (UserAlreadyExistsException | PolicyFailureException e) {
+            // unexpected exception
+            fail();
+        }
+
+        assertEquals(ud.getUserData(user), new UserData(user, email, screen));
     }
 }
