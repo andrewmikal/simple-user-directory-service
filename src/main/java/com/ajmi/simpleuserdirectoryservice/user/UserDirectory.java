@@ -34,4 +34,10 @@ public interface UserDirectory {
      */
     String[] getUsers();
 
+    /**
+     * Retrieves the policy used to check the username, email, screen name, and password.
+     * @return A non-null Policy.
+     */
+    Policy getPolicy();
+
 }

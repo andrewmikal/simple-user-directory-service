@@ -115,4 +115,13 @@ public abstract class TestUserDirectory {
         }
         assertEquals(usernames, ud.getUsers());
     }
+
+    /**
+     * Tests that the getPolicy() method does not return null.
+     */
+    @Test
+    public void testGetPolicyNotNull() {
+        UserDirectory ud = create();
+        assertNotNull(ud.getPolicy());
+    }
 }
