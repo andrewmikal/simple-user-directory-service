@@ -124,4 +124,33 @@ public abstract class TestUserDirectory {
         UserDirectory ud = create();
         assertNotNull(ud.getPolicy());
     }
+
+    /**
+     * Test validateUser().
+     */
+    @Test
+    public void testValidateUser() {
+        UserDirectory ud = create();
+
+        // create user
+        String user = username();
+        String pass = "password"+username();
+        try {
+            ud.addUser(user, "foo", "bar", pass);
+        } catch (UserAlreadyExistsException | PolicyFailureException e) {
+            // unexpected exception
+            fail();
+        }
+
+        // test method when valid
+        assertTrue(ud.validateUser(user, pass));
+
+        // test method when invalid
+        assertFalse(ud.validateUser(user, "wrong pass"));
+
+        // test method when user doesn't exist
+        String dneUser = "this-user-doesn't-exist"+username();
+        assertFalse(ud.hasUser(dneUser));
+        assertFalse(ud.validateUser(dneUser, pass));
+    }
 }
