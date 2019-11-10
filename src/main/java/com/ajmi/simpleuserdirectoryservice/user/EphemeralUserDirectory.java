@@ -79,8 +79,18 @@ public class EphemeralUserDirectory implements UserDirectory {
         _passwords.put(username, password);
     }
 
+    /**
+     * Removes the entries with the specified username as the key from the users and passwords hash maps.
+     * @param username User name of the user to remove.
+     * @return True if hasUser() returns true, false otherwise.
+     */
     @Override
     public boolean removeUser(String username) {
+        if (hasUser(username)) {
+            _users.remove(username);
+            _passwords.remove(username);
+            return true;
+        }
         return false;
     }
 
