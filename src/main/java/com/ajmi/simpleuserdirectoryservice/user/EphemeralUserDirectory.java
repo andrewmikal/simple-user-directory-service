@@ -15,6 +15,38 @@ public class EphemeralUserDirectory implements UserDirectory {
     private Policy _policy;
 
     /**
+     * Creates an new EphemeralUserDirectory with a policy that accepts any username, any email, any screen name, and
+     * any password.
+     */
+    public EphemeralUserDirectory() {
+        _users = new HashMap<>();
+        _passwords = new HashMap<>();
+
+        // create new policy
+        _policy = new Policy() {
+            @Override
+            public boolean checkUsername(String username) {
+                return true;
+            }
+
+            @Override
+            public boolean checkEmail(String email) {
+                return true;
+            }
+
+            @Override
+            public boolean checkScreenName(String screenName) {
+                return true;
+            }
+
+            @Override
+            public boolean checkPassword(String password) {
+                return true;
+            }
+        };
+    }
+
+    /**
      * Checks that the users hash map contains the provided username as a key.
      * @param username User name of the user to check for.
      * @return Returns true if the provided username is a key in the hash map, false otherwise.
