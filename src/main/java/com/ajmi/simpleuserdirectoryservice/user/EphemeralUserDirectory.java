@@ -21,7 +21,6 @@ public class EphemeralUserDirectory implements UserDirectory {
     public EphemeralUserDirectory() {
         _users = new HashMap<>();
         _passwords = new HashMap<>();
-
         // create new policy
         _policy = new Policy() {
             @Override
@@ -137,9 +136,10 @@ public class EphemeralUserDirectory implements UserDirectory {
     }
 
     /**
-     * Removes the entry with the specified username as the key from the users and passwords hash maps, then adds a new
-     * entry to each of the hash maps with the new username as the key, using the old password, and creating a new
-     * UserData object with the new username and the old email and screen name.
+     * If the directory has the specified user, then the directory removes the entry with the specified username as the
+     * key from the users and passwords hash maps, then adds a new entry to each of the hash maps with the new username
+     * as the key, using the old password, and creating a new UserData object with the new username and the old email
+     * and screen name.
      * @param username Username of the user to update.
      * @param newUsername Username to change the user's current username to.
      */
@@ -155,9 +155,18 @@ public class EphemeralUserDirectory implements UserDirectory {
         }
     }
 
+    /**
+     * If the specified user exists, put the specified username back into the users hash map with a new UserData object
+     * containing the old username, new email, and old screen name.
+     * @param username Username of the user to update.
+     * @param newEmail Email to change the user's current email to.
+     */
     @Override
     public void updateEmail(String username, String newEmail) {
-
+        if (hasUser(username)) {
+            UserData data = _users.get(username);
+            _users.put(username, new UserData(username, newEmail, data.getScreenName()));
+        }
     }
 
     @Override
