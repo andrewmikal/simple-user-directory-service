@@ -14,7 +14,7 @@ public class EphemeralUserDirectory implements UserDirectory {
 
     @Override
     public boolean hasUser(String username) {
-        return false;
+        return _users.containsKey(username);
     }
 
     @Override
