@@ -3,7 +3,10 @@ package com.ajmi.simpleuserdirectoryservice.user;
 /**
  * User directory implemented as a Plain Old Java Object.
  */
-public class POJOUserDirectory implements UserDirectory {
+public class EphemeralUserDirectory implements UserDirectory {
+
+
+
     @Override
     public boolean hasUser(String username) {
         return false;
