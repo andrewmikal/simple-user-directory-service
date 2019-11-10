@@ -55,4 +55,32 @@ public interface UserDirectory {
      */
     UserData getUserData(String username);
 
+    /**
+     * Updates the username of the specified user.
+     * @param username Username of the user to update.
+     * @param newUsername Username to change the user's current username to.
+     */
+    void updateUsername(String username, String newUsername);
+
+    /**
+     * Updates the email of the specified user.
+     * @param username Username of the user to update.
+     * @param newEmail Email to change the user's current email to.
+     */
+    void updateEmail(String username, String newEmail);
+
+    /**
+     * Updates the screen name of the specified user.
+     * @param username Username of the user to update.
+     * @param newScreenName Screen name to change the user's current screen name to.
+     */
+    void updateScreenName(String username, String newScreenName);
+
+    /**
+     * Updates the password of the specified user.
+     * @param username Username of the user to update.
+     * @param newPassword Password to change the user's current password to.
+     */
+    void updatePassword(String username, String newPassword);
+
 }
