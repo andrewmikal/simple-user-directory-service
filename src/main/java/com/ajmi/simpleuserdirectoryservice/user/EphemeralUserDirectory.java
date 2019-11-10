@@ -99,7 +99,9 @@ public class EphemeralUserDirectory implements UserDirectory {
      */
     @Override
     public String[] getUsers() {
-        return _users.keySet().toArray(new String[0]);
+        String[] users = new String[_users.size()];
+        _users.keySet().toArray(users);
+        return users;
     }
 
     /**

@@ -101,7 +101,7 @@ public abstract class TestUserDirectory {
     @Test
     public void testGetUsers() {
         UserDirectory ud = create();
-        String[] usernames = {username(), username(), username(), username(), username()};
+        String[] usernames = {"1"+username(), "2"+username(), "3"+username(), "4"+username(), "5"+username()};
         for (String name : usernames) {
             try {
                 ud.addUser(name, "foo", "bar", "baz");
