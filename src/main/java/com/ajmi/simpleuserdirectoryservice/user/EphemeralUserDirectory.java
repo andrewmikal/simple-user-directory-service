@@ -169,13 +169,29 @@ public class EphemeralUserDirectory implements UserDirectory {
         }
     }
 
+    /**
+     * If the specified user exists, put the specified username back into the users hash map with a new UserData object
+     * containing the old username, odl email, and new screen name.
+     * @param username Username of the user to update.
+     * @param newScreenName Screen name to change the user's current screen name to.
+     */
     @Override
     public void updateScreenName(String username, String newScreenName) {
-
+        if (hasUser(username)) {
+            UserData data = _users.get(username);
+            _users.put(username, new UserData(username, data.getEmail(), newScreenName));
+        }
     }
 
+    /**
+     * If the specified user exists, put the specified username back into the passwords hash map with the new password.
+     * @param username Username of the user to update.
+     * @param newPassword Password to change the user's current password to.
+     */
     @Override
     public void updatePassword(String username, String newPassword) {
-
+        if (hasUser(username)) {
+            _passwords.put(username, newPassword);
+        }
     }
 }
