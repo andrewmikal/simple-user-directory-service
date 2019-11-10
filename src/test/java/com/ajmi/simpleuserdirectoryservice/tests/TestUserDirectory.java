@@ -171,4 +171,108 @@ public abstract class TestUserDirectory {
 
         assertEquals(ud.getUserData(user), new UserData(user, email, screen));
     }
+
+    /**
+     * Tests updateUsername().
+     */
+    @Test
+    public void testUpdateUsername() {
+        UserDirectory ud = create();
+
+        String user = username();
+        String email = "foo";
+        String screen = "bar";
+        String pass = "baz";
+        String newUser = username();
+
+        try {
+            ud.addUser(user, email, screen, pass);
+        } catch (UserAlreadyExistsException | PolicyFailureException e) {
+            // unexpected exception
+            fail();
+        }
+        assertTrue(ud.hasUser(user));
+
+        ud.updateUsername(user, newUser);
+        assertFalse(ud.hasUser(user));
+        assertTrue(ud.hasUser(newUser));
+
+        assertEquals(ud.getUserData(newUser), new UserData(newUser, email, screen));
+        assertTrue(ud.authenticateUser(newUser, pass));
+    }
+
+    /**
+     * Tests updateEmail().
+     */
+    @Test
+    public void testUpdateEmail() {
+        UserDirectory ud = create();
+
+        String user = username();
+        String email = "foo";
+        String screen = "bar";
+        String pass = "baz";
+        String newEmail = "qux";
+
+        try {
+            ud.addUser(user, email, screen, pass);
+        } catch (UserAlreadyExistsException | PolicyFailureException e) {
+            // unexpected exception
+            fail();
+        }
+        ud.updateEmail(user, newEmail);
+
+        assertEquals(ud.getUserData(user), new UserData(user, newEmail, screen));
+        assertTrue(ud.authenticateUser(user, pass));
+    }
+
+    /**
+     * Tests updateScreenName().
+     */
+    @Test
+    public void testUpdateScreenName() {
+        UserDirectory ud = create();
+
+        String user = username();
+        String email = "foo";
+        String screen = "bar";
+        String pass = "baz";
+        String newScreen = "qux";
+
+        try {
+            ud.addUser(user, email, screen, pass);
+        } catch (UserAlreadyExistsException | PolicyFailureException e) {
+            // unexpected exception
+            fail();
+        }
+        ud.updateScreenName(user, newScreen);
+
+        assertEquals(ud.getUserData(user), new UserData(user, email, newScreen));
+        assertTrue(ud.authenticateUser(user, pass));
+    }
+
+    /**
+     * Tests updatePassword().
+     */
+    @Test
+    public void testUpdatePassword() {
+        UserDirectory ud = create();
+
+        String user = username();
+        String email = "foo";
+        String screen = "bar";
+        String pass = "baz";
+        String newPass = "qux";
+
+        try {
+            ud.addUser(user, email, screen, pass);
+        } catch (UserAlreadyExistsException | PolicyFailureException e) {
+            // unexpected exception
+            fail();
+        }
+        ud.updatePassword(user, newPass);
+
+        assertEquals(ud.getUserData(user), new UserData(user, email, screen));
+        assertTrue(ud.authenticateUser(user, newPass));
+    }
 }
