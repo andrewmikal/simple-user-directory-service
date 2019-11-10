@@ -124,12 +124,15 @@ public class EphemeralUserDirectory implements UserDirectory {
     }
 
     /**
-     *
+     * Retrieves a UserData object from the users hash map containing information on the specified user.
      * @param username Username of the user to retrieve data on.
-     * @return
+     * @return A UserData object containing the data if the user exists, and null if the user does not exist.
      */
     @Override
     public UserData getUserData(String username) {
+        if (hasUser(username)) {
+            return _users.get(username);
+        }
         return null;
     }
 
