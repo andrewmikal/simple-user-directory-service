@@ -94,9 +94,13 @@ public class EphemeralUserDirectory implements UserDirectory {
         return false;
     }
 
+    /**
+     * Retrieves an array of all the keys of the users hash map.
+     * @return Returns the key set of the users hash map cast to an array of strings.
+     */
     @Override
     public String[] getUsers() {
-        return new String[0];
+        return _users.keySet().toArray(new String[0]);
     }
 
     @Override
