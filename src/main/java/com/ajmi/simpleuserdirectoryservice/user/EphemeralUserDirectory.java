@@ -103,9 +103,13 @@ public class EphemeralUserDirectory implements UserDirectory {
         return _users.keySet().toArray(new String[0]);
     }
 
+    /**
+     * Retrieves the directory's policy.
+     * @return Retrieves the directory's policy.
+     */
     @Override
     public Policy getPolicy() {
-        return null;
+        return _policy;
     }
 
     @Override
