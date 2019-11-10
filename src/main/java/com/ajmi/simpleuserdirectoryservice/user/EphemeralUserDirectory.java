@@ -136,9 +136,23 @@ public class EphemeralUserDirectory implements UserDirectory {
         return null;
     }
 
+    /**
+     * Removes the entry with the specified username as the key from the users and passwords hash maps, then adds a new
+     * entry to each of the hash maps with the new username as the key, using the old password, and creating a new
+     * UserData object with the new username and the old email and screen name.
+     * @param username Username of the user to update.
+     * @param newUsername Username to change the user's current username to.
+     */
     @Override
     public void updateUsername(String username, String newUsername) {
-
+        if (hasUser(username)) {
+            UserData data = _users.get(username);
+            String pass = _passwords.get(username);
+            _users.remove(username);
+            _users.put(newUsername, new UserData(newUsername, data.getEmail(), data.getScreenName()));
+            _passwords.remove(username);
+            _passwords.put(newUsername, pass);
+        }
     }
 
     @Override
