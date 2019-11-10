@@ -123,6 +123,11 @@ public class EphemeralUserDirectory implements UserDirectory {
         return password.equals(_passwords.get(username));
     }
 
+    /**
+     *
+     * @param username Username of the user to retrieve data on.
+     * @return
+     */
     @Override
     public UserData getUserData(String username) {
         return null;
