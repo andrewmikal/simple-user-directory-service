@@ -112,9 +112,15 @@ public class EphemeralUserDirectory implements UserDirectory {
         return _policy;
     }
 
+    /**
+     * Checks that the provided password matches the password in the passwords hash map.
+     * @param username Username of user to authenticate.
+     * @param password Password used to authenticate the user.
+     * @return Returns true if the passwords match, false otherwise.
+     */
     @Override
     public boolean authenticateUser(String username, String password) {
-        return false;
+        return password.equals(_passwords.get(username));
     }
 
     @Override
