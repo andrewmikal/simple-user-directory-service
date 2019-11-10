@@ -1,11 +1,16 @@
 package com.ajmi.simpleuserdirectoryservice.user;
 
+import java.util.HashMap;
+
 /**
  * User directory implemented as a Plain Old Java Object.
  */
 public class EphemeralUserDirectory implements UserDirectory {
 
-
+    /** Hash map containing user data indexed by username. **/
+    private HashMap<String, UserData> _users;
+    /** Hash map containing user passwords indexed by username. **/
+    private HashMap<String, String> _passwords;
 
     @Override
     public boolean hasUser(String username) {
