@@ -3,10 +3,12 @@ package com.ajmi.simpleuserdirectoryservice.tests;
 import com.ajmi.simpleuserdirectoryservice.user.*;
 import org.junit.Test;
 
+import java.time.Clock;
 import java.time.Instant;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.time.format.FormatStyle;
+import java.util.Arrays;
 import java.util.Locale;
 
 import static junit.framework.TestCase.*;
@@ -22,6 +24,9 @@ public abstract class TestUserDirectory {
             .withLocale(Locale.US)
             .withZone(ZoneId.systemDefault());
 
+    /** Used to get the time in nano seconds. */
+    private static final Instant instant = Clock.systemDefaultZone().instant();
+
     /**
      * Creates a new user directory.
      * @return a new UserDirectory object.
@@ -33,7 +38,7 @@ public abstract class TestUserDirectory {
      * @return a String to use as a username based on the current time.
      */
     private static String username() {
-        return "TestUserDirectory-Username:"+formatter.format(Instant.now());
+        return "TestUserDirectory-Username:"+instant.getNano();//System.currentTimeMillis();//+formatter.format(Instant.now());
     }
 
     /**
@@ -110,7 +115,13 @@ public abstract class TestUserDirectory {
                 fail();
             }
         }
-        assertEquals(usernames, ud.getUsers());
+        String[] users = ud.getUsers();
+        Arrays.sort(usernames);
+        Arrays.sort(users);
+        assertEquals(usernames.length, users.length);
+        for (int i = 0; i < usernames.length; i++) {
+            assertEquals(usernames[i], users[i]);
+        }
     }
 
     /**
@@ -179,11 +190,11 @@ public abstract class TestUserDirectory {
     public void testUpdateUsername() {
         UserDirectory ud = create();
 
-        String user = username();
+        String user = "old"+username();
         String email = "foo";
         String screen = "bar";
         String pass = "baz";
-        String newUser = username();
+        String newUser = "new"+username();
 
         try {
             ud.addUser(user, email, screen, pass);
