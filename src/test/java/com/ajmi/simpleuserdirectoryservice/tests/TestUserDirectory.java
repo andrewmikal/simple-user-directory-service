@@ -45,7 +45,7 @@ public abstract class TestUserDirectory {
      * Tests the hasUser() method when the user does not exist in the directory.
      */
     @Test
-    public void testHasUserDNE() {
+    public void testHasUserDNE() throws ConnectionFailureException {
         UserDirectory ud = create();
         // check if the directory hasUser a user that doesn't exist
         assertFalse(ud.hasUser(username()));
@@ -56,7 +56,7 @@ public abstract class TestUserDirectory {
      *  the user is added to the directory.
      */
     @Test
-    public void testAddUserHasUser() {
+    public void testAddUserHasUser() throws ConnectionFailureException {
         UserDirectory ud = create();
         String uname = username();
 
@@ -76,7 +76,7 @@ public abstract class TestUserDirectory {
      * Tests the removeUser() method when the user does not exist in the directory.
      */
     @Test
-    public void testRemoveUserDNE() {
+    public void testRemoveUserDNE() throws ConnectionFailureException {
         UserDirectory ud = create();
         assertFalse(ud.removeUser(username()));
     }
@@ -85,7 +85,7 @@ public abstract class TestUserDirectory {
      * Tests the removeUser() method when the user exists in the directory.
      */
     @Test
-    public void testRemoveUserExists() {
+    public void testRemoveUserExists() throws ConnectionFailureException {
         UserDirectory ud = create();
         String uname = username();
         try {
@@ -104,7 +104,7 @@ public abstract class TestUserDirectory {
      * Tests the getUsers() method.
      */
     @Test
-    public void testGetUsers() {
+    public void testGetUsers() throws ConnectionFailureException {
         UserDirectory ud = create();
         String[] usernames = {"1"+username(), "2"+username(), "3"+username(), "4"+username(), "5"+username()};
         for (String name : usernames) {
@@ -128,7 +128,7 @@ public abstract class TestUserDirectory {
      * Tests that the getPolicy() method does not return null.
      */
     @Test
-    public void testGetPolicyNotNull() {
+    public void testGetPolicyNotNull() throws ConnectionFailureException {
         UserDirectory ud = create();
         assertNotNull(ud.getPolicy());
     }
@@ -137,7 +137,7 @@ public abstract class TestUserDirectory {
      * Test authenticateUser().
      */
     @Test
-    public void testAuthenticateUser() {
+    public void testAuthenticateUser() throws ConnectionFailureException {
         UserDirectory ud = create();
 
         // create user
@@ -166,7 +166,7 @@ public abstract class TestUserDirectory {
      * Tests getUserData().
      */
     @Test
-    public void testGetUserData() {
+    public void testGetUserData() throws ConnectionFailureException {
         UserDirectory ud = create();
 
         String user = username();
@@ -187,7 +187,7 @@ public abstract class TestUserDirectory {
      * Tests updateUsername().
      */
     @Test
-    public void testUpdateUsername() {
+    public void testUpdateUsername() throws ConnectionFailureException {
         UserDirectory ud = create();
 
         String user = "old"+username();
@@ -216,7 +216,7 @@ public abstract class TestUserDirectory {
      * Tests updateEmail().
      */
     @Test
-    public void testUpdateEmail() {
+    public void testUpdateEmail() throws ConnectionFailureException {
         UserDirectory ud = create();
 
         String user = username();
@@ -241,7 +241,7 @@ public abstract class TestUserDirectory {
      * Tests updateScreenName().
      */
     @Test
-    public void testUpdateScreenName() {
+    public void testUpdateScreenName() throws ConnectionFailureException {
         UserDirectory ud = create();
 
         String user = username();
@@ -266,7 +266,7 @@ public abstract class TestUserDirectory {
      * Tests updatePassword().
      */
     @Test
-    public void testUpdatePassword() {
+    public void testUpdatePassword() throws ConnectionFailureException {
         UserDirectory ud = create();
 
         String user = username();
