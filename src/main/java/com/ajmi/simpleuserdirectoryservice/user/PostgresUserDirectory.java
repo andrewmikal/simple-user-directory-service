@@ -1,5 +1,9 @@
 package com.ajmi.simpleuserdirectoryservice.user;
 
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.SQLException;
+
 /**
  * User Directory using a PostgreSQL Database.
  */
@@ -88,5 +92,14 @@ public class PostgresUserDirectory implements UserDirectory {
     @Override
     public void updatePassword(String username, String newPassword) throws ConnectionFailureException {
 
+    }
+
+    /**
+     * Creates a new connection to the directory's database.
+     * @return Returns a new SQL Connection object to the directory's database.
+     * @throws SQLException Thrown when their is a problem connecting to the database.
+     */
+    private Connection connect() throws SQLException {
+        return DriverManager.getConnection(_postgresURL, _postgresUser, _postgresPass);
     }
 }
