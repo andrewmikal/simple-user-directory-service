@@ -11,6 +11,8 @@ public class EphemeralUserDirectory implements UserDirectory {
     private HashMap<String, UserData> _users;
     /** Hash map containing user passwords indexed by username. **/
     private HashMap<String, String> _passwords;
+    /** Hash map containing user salts indexed by username. **/
+    private HashMap<String, String> _salts;
     /** Policy for usernames, emails, screen names, and passwords. */
     private Policy _policy;
 
@@ -21,6 +23,8 @@ public class EphemeralUserDirectory implements UserDirectory {
     public EphemeralUserDirectory() {
         _users = new HashMap<>();
         _passwords = new HashMap<>();
+        _salts = new HashMap<>();
+
         // create new policy
         _policy = new Policy() {
             @Override
@@ -75,19 +79,23 @@ public class EphemeralUserDirectory implements UserDirectory {
             throw new PolicyFailureException("The entered data failed the directory's policy.");
         }
         _users.put(username, new UserData(username, email, screeName));
-        _passwords.put(username, password);
+
+        String salt = PasswordCrypt.nextSalt();
+        _passwords.put(username, PasswordCrypt.hashPassword(password, salt));
+        _salts.put(username, salt);
     }
 
     /**
      * Removes the entries with the specified username as the key from the users and passwords hash maps.
      * @param username User name of the user to remove.
-     * @return True if hasUser() returns true, false otherwise.
+     * @return Returns true if hasUser() returns true, false otherwise.
      */
     @Override
     public boolean removeUser(String username) {
         if (hasUser(username)) {
             _users.remove(username);
             _passwords.remove(username);
+            _salts.remove(username);
             return true;
         }
         return false;
@@ -121,7 +129,10 @@ public class EphemeralUserDirectory implements UserDirectory {
      */
     @Override
     public boolean authenticateUser(String username, String password) {
-        return password.equals(_passwords.get(username));
+        if (hasUser(username)) {
+            return PasswordCrypt.hashPassword(password, _salts.get(username)).equals(_passwords.get(username));
+        }
+        return false;
     }
 
     /**
@@ -150,10 +161,13 @@ public class EphemeralUserDirectory implements UserDirectory {
         if (hasUser(username)) {
             UserData data = _users.get(username);
             String pass = _passwords.get(username);
+            String salt = _salts.get(username);
             _users.remove(username);
             _users.put(newUsername, new UserData(newUsername, data.getEmail(), data.getScreenName()));
             _passwords.remove(username);
             _passwords.put(newUsername, pass);
+            _salts.remove(username);
+            _salts.put(newUsername, salt);
         }
     }
 
@@ -193,7 +207,9 @@ public class EphemeralUserDirectory implements UserDirectory {
     @Override
     public void updatePassword(String username, String newPassword) {
         if (hasUser(username)) {
-            _passwords.put(username, newPassword);
+            String salt = PasswordCrypt.nextSalt();
+            _passwords.put(username, PasswordCrypt.hashPassword(newPassword, salt));
+            _salts.put(username, salt);
         }
     }
 }
