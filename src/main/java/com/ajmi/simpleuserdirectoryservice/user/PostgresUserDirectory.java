@@ -3,6 +3,8 @@ package com.ajmi.simpleuserdirectoryservice.user;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * User Directory using a PostgreSQL Database.
@@ -20,6 +22,8 @@ public class PostgresUserDirectory implements UserDirectory {
         }
     }
 
+    private static final Logger LOGGER = Logger.getLogger(PostgresUserDirectory.class.getName());
+
     /** URL to the postgres database. */
     private final String _postgresURL;
     /** Username to log into the postgres database. */
@@ -29,14 +33,30 @@ public class PostgresUserDirectory implements UserDirectory {
 
     /**
      * Create a new PostgresUserDirectory with the credentials to log into the PostreSQL database.
-     * @param url URL to the database.
-     * @param user Username to log into the database.
-     * @param pass Password to log into the database.
+     * @param host URL to the Postgres instance.
+     * @param database Name of the Postgres database.
+     * @param user Username to log into Postgres.
+     * @param pass Password to log into Postgres.
      */
-    public PostgresUserDirectory(String url, String user, String pass) {
-        _postgresURL = url;
+    public PostgresUserDirectory(String host, String database, String user, String pass) {
+        _postgresURL = String.format("jdbc:postgresql://%s/%s", host, database);
         _postgresUser = user;
         _postgresPass = pass;
+    }
+
+    /**
+     * Attempts to connect to the Postgres database to test the connection.
+     * @return true if the connection was successful, false if it could not connect.
+     */
+    public boolean testConnection() {
+        boolean connected;
+        try (Connection connection = connect()) {
+            connected = true;
+        } catch (SQLException e) {
+            LOGGER.log(Level.WARNING, "Failed to connect to Postgres database: ", e);
+            connected = false;
+        }
+        return connected;
     }
 
     @Override
