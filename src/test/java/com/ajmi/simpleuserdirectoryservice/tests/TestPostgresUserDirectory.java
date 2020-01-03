@@ -1,5 +1,6 @@
 package com.ajmi.simpleuserdirectoryservice.tests;
 
+import com.ajmi.simpleuserdirectoryservice.user.ConnectionFailureException;
 import com.ajmi.simpleuserdirectoryservice.user.PostgresUserDirectory;
 import com.ajmi.simpleuserdirectoryservice.user.UserDirectory;
 import org.junit.Test;
@@ -45,9 +46,13 @@ public class TestPostgresUserDirectory extends TestUserDirectory {
         } catch (IOException e) {
             throw new RuntimeException("Could not find file \"suds-test.properties\": ", e);
         }
-        return new PostgresUserDirectory(properties.getProperty("suds.pg.host"),
-                properties.getProperty("suds.pg.database"),
-                properties.getProperty("suds.pg.user"),
-                properties.getProperty("suds.pg.pass"));
+        try {
+            return new PostgresUserDirectory(properties.getProperty("suds.pg.host"),
+                    properties.getProperty("suds.pg.database"),
+                    properties.getProperty("suds.pg.user"),
+                    properties.getProperty("suds.pg.pass"));
+        } catch (ConnectionFailureException e) {
+            throw new RuntimeException(e);
+        }
     }
 }
