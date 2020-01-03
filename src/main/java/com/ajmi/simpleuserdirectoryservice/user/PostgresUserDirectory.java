@@ -148,34 +148,35 @@ public class PostgresUserDirectory implements UserDirectory {
                 // create the users table
                 try (PreparedStatement statement = connection.prepareStatement(CREATE_USERS_TABLE)) {
                     // execute the SQL statement and if it fails to execute throw an exception
-                    if (statement.executeUpdate() == 0) {
+                    if (!statement.execute()) {
                         throw new SQLException(SQL_EXEC_FAILURE_MSG + statement.toString());
                     }
                 }
                 // create the passwords table
                 try (PreparedStatement statement = connection.prepareStatement(CREATE_PASSWORDS_TABLE)) {
                     // execute the SQL statement and if it fails to execute throw an exception
-                    if (statement.executeUpdate() == 0) {
+                    if (!statement.execute()) {
                         throw new SQLException(SQL_EXEC_FAILURE_MSG + statement.toString());
                     }
                 }
                 // drop constraints from passwords table
                 try (PreparedStatement statement = connection.prepareStatement(PASSWORDS_DROP_CONSTRAINT)) {
                     // execute the SQL statement and if it fails to execute throw an exception
-                    if (statement.executeUpdate() == 0) {
+                    if (!statement.execute()) {
                         throw new SQLException(SQL_EXEC_FAILURE_MSG + statement.toString());
                     }
                 }
                 // add constraints to passwords table
                 try (PreparedStatement statement = connection.prepareStatement(PASSWORDS_ADD_CONSTRAINT)) {
                     // execute the SQL statement and if it fails to execute throw an exception
-                    if (statement.executeUpdate() == 0) {
+                    if (!statement.execute()) {
                         throw new SQLException(SQL_EXEC_FAILURE_MSG + statement.toString());
                     }
                 }
                 connection.commit();
             } catch (SQLException e) {
                 LOGGER.log(Level.WARNING, "Error creating database tables: ", e);
+                connection.rollback();
             } finally {
                 connection.setAutoCommit(originalAutoCommit);
             }
