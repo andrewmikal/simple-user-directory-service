@@ -137,7 +137,6 @@ public class PostgresUserDirectory implements UserDirectory {
     private void createTables() throws ConnectionFailureException{
         final String CREATE_USERS_TABLE = "CREATE TABLE users (u_id SERIAL PRIMARY KEY, u_email TEXT, u_username TEXT NOT NULL UNIQUE, u_screenname TEXT NOT NULL, u_salt TEXT NOT NULL);";
         final String CREATE_PASSWORDS_TABLE = "CREATE TABLE passwords (p_uid INTEGER PRIMARY KEY, p_hashed CHAR(128) NOT NULL);";
-        final String PASSWORDS_DROP_CONSTRAINT = "alter table passwords drop constraint passwords_p_uid_fkey;";
         final String PASSWORDS_ADD_CONSTRAINT = "alter table passwords add constraint passwords_p_uid_fkey foreign key (p_uid) references users (u_id) on delete cascade;";
         try (Connection connection = connect()) {
             // remember the original auto commit so it can be restored at the end of the function
@@ -149,28 +148,21 @@ public class PostgresUserDirectory implements UserDirectory {
                 try (PreparedStatement statement = connection.prepareStatement(CREATE_USERS_TABLE)) {
                     // execute the SQL statement and if it fails to execute throw an exception
                     if (!statement.execute()) {
-                        throw new SQLException(SQL_EXEC_FAILURE_MSG + statement.toString());
+                        //throw new SQLException(SQL_EXEC_FAILURE_MSG + statement.toString());
                     }
                 }
                 // create the passwords table
                 try (PreparedStatement statement = connection.prepareStatement(CREATE_PASSWORDS_TABLE)) {
                     // execute the SQL statement and if it fails to execute throw an exception
                     if (!statement.execute()) {
-                        throw new SQLException(SQL_EXEC_FAILURE_MSG + statement.toString());
-                    }
-                }
-                // drop constraints from passwords table
-                try (PreparedStatement statement = connection.prepareStatement(PASSWORDS_DROP_CONSTRAINT)) {
-                    // execute the SQL statement and if it fails to execute throw an exception
-                    if (!statement.execute()) {
-                        throw new SQLException(SQL_EXEC_FAILURE_MSG + statement.toString());
+                        //throw new SQLException(SQL_EXEC_FAILURE_MSG + statement.toString());
                     }
                 }
                 // add constraints to passwords table
                 try (PreparedStatement statement = connection.prepareStatement(PASSWORDS_ADD_CONSTRAINT)) {
                     // execute the SQL statement and if it fails to execute throw an exception
                     if (!statement.execute()) {
-                        throw new SQLException(SQL_EXEC_FAILURE_MSG + statement.toString());
+                        //throw new SQLException(SQL_EXEC_FAILURE_MSG + statement.toString());
                     }
                 }
                 connection.commit();
