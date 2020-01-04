@@ -1,9 +1,6 @@
 package com.ajmi.simpleuserdirectoryservice.user;
 
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.PreparedStatement;
-import java.sql.SQLException;
+import java.sql.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -67,10 +64,31 @@ public class PostgresUserDirectory implements UserDirectory {
         return connected;
     }
 
+    /**
+     * Executes a SQL query to get the number of users in the database with the specified username, and returns true if
+     * that value is equal to one.
+     * @param username User name of the user to check for.
+     * @return true if the number of users in the database with the specified username is equal to one.
+     * @throws ConnectionFailureException if a SQLException occurs.
+     */
     @Override
     public boolean hasUser(String username) throws ConnectionFailureException {
         final String USER_EXISTS = "SELECT COUNT(1) FROM users WHERE u_username=(?)";
-        return false;
+
+        try (Connection connection = connect()) {
+            try (PreparedStatement statement = connection.prepareStatement(USER_EXISTS)) {
+                statement.setString(1, username);
+                ResultSet resultSet = statement.executeQuery();
+                if (!resultSet.next()) {
+                    throw new SQLException(SQL_EXEC_FAILURE_MSG + statement.toString());
+                }
+                return resultSet.getInt(1)==1;
+            }
+        } catch (SQLException e) {
+            String errorMsg = "Error checking if the user \""+username+"\" exists: ";
+            LOGGER.log(Level.WARNING, errorMsg, e);
+            throw new ConnectionFailureException(errorMsg, e);
+        }
     }
 
     @Override
