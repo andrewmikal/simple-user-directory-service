@@ -69,6 +69,7 @@ public class PostgresUserDirectory implements UserDirectory {
 
     @Override
     public boolean hasUser(String username) throws ConnectionFailureException {
+        final String USER_EXISTS = "SELECT COUNT(1) FROM users WHERE u_username=(?)";
         return false;
     }
 
@@ -137,7 +138,7 @@ public class PostgresUserDirectory implements UserDirectory {
     private void createTables() throws ConnectionFailureException{
         final String CREATE_USERS_TABLE = "CREATE TABLE users (u_id SERIAL PRIMARY KEY, u_email TEXT, u_username TEXT NOT NULL UNIQUE, u_screenname TEXT NOT NULL, u_salt TEXT NOT NULL);";
         final String CREATE_PASSWORDS_TABLE = "CREATE TABLE passwords (p_uid INTEGER PRIMARY KEY, p_hashed CHAR(128) NOT NULL);";
-        final String PASSWORDS_ADD_CONSTRAINT = "alter table passwords add constraint passwords_p_uid_fkey foreign key (p_uid) references users (u_id) on delete cascade;";
+        final String PASSWORDS_ADD_CONSTRAINT = "ALTER TABLE passwords ADD CONSTRAINT passwords_p_uid_fkey FOREIGN KEY (p_uid) REFERENCES users (u_id) ON DELETE CASCADE;";
         try (Connection connection = connect()) {
             // remember the original auto commit so it can be restored at the end of the function
             boolean originalAutoCommit = connection.getAutoCommit();
