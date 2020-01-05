@@ -49,7 +49,10 @@ public class PostgresUserDirectory implements UserDirectory {
         _postgresURL = String.format("jdbc:postgresql://%s/%s", host, database);
         _postgresUser = user;
         _postgresPass = pass;
-        createTables();
+        // create tables if they don't already exist
+        if (!tableExists("users")) {
+            createTables();
+        }
     }
 
     /**
@@ -242,7 +245,15 @@ public class PostgresUserDirectory implements UserDirectory {
         }
     }
 
-    private boolean tableExists() {
-        return false;
+    private boolean tableExists(String tableName) throws ConnectionFailureException {
+        try (Connection connection = connect()) {
+            try (ResultSet result = connection.getMetaData().getTables(null, null, tableName, null)) {
+                // return true if the table exists, false if it doesn't
+                return result.next();
+            }
+        } catch (SQLException e) {
+            LOGGER.log(Level.WARNING, CONNECTION_FAILURE_MSG, e);
+            throw new ConnectionFailureException(CONNECTION_FAILURE_MSG, e);
+        }
     }
 }
