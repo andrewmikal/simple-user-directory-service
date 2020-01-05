@@ -21,28 +21,19 @@ public abstract class TestUserDirectory {
     /** Used for generating unique user names. */
     private static int userNumber = 0;
 
-    /** Used to format current time when creating new entries in the UserDirectory. */
-    private static final DateTimeFormatter formatter = DateTimeFormatter
-            .ofLocalizedDate(FormatStyle.FULL)
-            .withLocale(Locale.US)
-            .withZone(ZoneId.systemDefault());
-
-    /** Used to get the time in nano seconds. */
-    private static final Instant instant = Clock.systemDefaultZone().instant();
+    /**
+     * Creates a username created from the current time.
+     * @return a String to use as a username based on the current time.
+     */
+    private static synchronized String username() {
+        return "TestUserDirectory-Username:"+System.currentTimeMillis()+"-"+userNumber++;
+    }
 
     /**
      * Creates a new user directory.
      * @return a new UserDirectory object.
      */
     protected abstract UserDirectory create();
-
-    /**
-     * Creates a username created from the current time.
-     * @return a String to use as a username based on the current time.
-     */
-    private static synchronized String username() {
-        return "TestUserDirectory-Username:"+System.currentTimeMillis()+"-"+userNumber++;//instant.getNano();//+formatter.format(Instant.now());
-    }
 
     /**
      * Tests the hasUser() method when the user does not exist in the directory.
