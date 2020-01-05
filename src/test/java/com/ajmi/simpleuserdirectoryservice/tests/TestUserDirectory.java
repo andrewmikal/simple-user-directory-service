@@ -18,6 +18,9 @@ import static junit.framework.TestCase.*;
  */
 public abstract class TestUserDirectory {
 
+    /** Used for generating unique user names. */
+    private static int userNumber = 0;
+
     /** Used to format current time when creating new entries in the UserDirectory. */
     private static final DateTimeFormatter formatter = DateTimeFormatter
             .ofLocalizedDate(FormatStyle.FULL)
@@ -37,8 +40,8 @@ public abstract class TestUserDirectory {
      * Creates a username created from the current time.
      * @return a String to use as a username based on the current time.
      */
-    private static String username() {
-        return "TestUserDirectory-Username:"+instant.getNano();//System.currentTimeMillis();//+formatter.format(Instant.now());
+    private static synchronized String username() {
+        return "TestUserDirectory-Username:"+System.currentTimeMillis()+"-"+userNumber++;//instant.getNano();//+formatter.format(Instant.now());
     }
 
     /**
