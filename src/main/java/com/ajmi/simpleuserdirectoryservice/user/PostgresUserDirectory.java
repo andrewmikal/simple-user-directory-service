@@ -1,5 +1,8 @@
 package com.ajmi.simpleuserdirectoryservice.user;
 
+import sun.rmi.runtime.Log;
+
+import javax.xml.transform.Result;
 import java.sql.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -78,11 +81,11 @@ public class PostgresUserDirectory implements UserDirectory {
         try (Connection connection = connect()) {
             try (PreparedStatement statement = connection.prepareStatement(USER_EXISTS)) {
                 statement.setString(1, username);
-                ResultSet resultSet = statement.executeQuery();
-                if (!resultSet.next()) {
+                ResultSet result = statement.executeQuery();
+                if (!result.next()) {
                     throw new SQLException(SQL_EXEC_FAILURE_MSG + statement.toString());
                 }
-                return resultSet.getInt(1)==1;
+                return result.getInt(1)==1;
             }
         } catch (SQLException e) {
             String errorMsg = "Error checking if the user \""+username+"\" exists: ";
@@ -93,7 +96,56 @@ public class PostgresUserDirectory implements UserDirectory {
 
     @Override
     public void addUser(String username, String email, String screeName, String password) throws ConnectionFailureException, UserAlreadyExistsException, PolicyFailureException {
+        final String INSERT_USERS = "INSERT INTO users (u_email, u_username, u_screenname, u_salt) VALUES (?, ?, ?, ?)";
+        final String INSERT_PASSWORDS = "INSERT INTO passwords (p_uid, p_hashed) VALUES (?, ?)";
 
+        try (Connection connection = connect()) {
+            // remember the original auto commit so it can be restored at the end of the function
+            boolean originalAutoCommit = connection.getAutoCommit();
+            // don't commit any table updates until all updates were successful
+            connection.setAutoCommit(false);
+            try {
+                // salt stored in users, used for encrypting password in passwords
+                String salt = PasswordCrypt.nextSalt();
+                // user id created when the user is added to the users table
+                int uID;
+                // insert into users table
+                try (PreparedStatement statement = connection.prepareStatement(INSERT_USERS, Statement.RETURN_GENERATED_KEYS)) {
+                    statement.setString(1, email);
+                    statement.setString(2, username);
+                    statement.setString(3, screeName);
+                    statement.setString(4, salt);
+                    if (statement.executeUpdate() == 0) {
+                        throw new SQLException(SQL_EXEC_FAILURE_MSG + statement.toString());
+                    }
+                    try (ResultSet keys = statement.getGeneratedKeys()) {
+                        if (!keys.next()) {
+                            throw new SQLException("Error getting keys from insert users statement.");
+                        }
+                        uID = keys.getInt(1);
+                    }
+                }
+                // insert into passwords table
+                try (PreparedStatement statement = connection.prepareStatement(INSERT_PASSWORDS)) {
+                    statement.setInt(1, uID);
+                    statement.setString(2, PasswordCrypt.hashPassword(password, salt));
+                    if (statement.executeUpdate() == 0) {
+                        throw new SQLException(SQL_EXEC_FAILURE_MSG + statement.toString());
+                    }
+                }
+                // update tables
+                connection.commit();
+            } catch (SQLException e) {
+                LOGGER.log(Level.WARNING, "Error adding user \""+username+"\": ", e);
+                // revert changes
+                connection.rollback();
+            } finally {
+                connection.setAutoCommit(originalAutoCommit);
+            }
+        } catch (SQLException e) {
+            // error connecting
+            LOGGER.log(Level.WARNING, CONNECTION_FAILURE_MSG, e);
+        }
     }
 
     @Override
@@ -175,9 +227,11 @@ public class PostgresUserDirectory implements UserDirectory {
                 try (PreparedStatement statement = connection.prepareStatement(PASSWORDS_ADD_CONSTRAINT)) {
                     statement.execute();
                 }
+                // add tables
                 connection.commit();
             } catch (SQLException e) {
                 LOGGER.log(Level.WARNING, "Error creating database tables: ", e);
+                // revert changes
                 connection.rollback();
             } finally {
                 connection.setAutoCommit(originalAutoCommit);
@@ -186,5 +240,9 @@ public class PostgresUserDirectory implements UserDirectory {
             LOGGER.log(Level.WARNING, CONNECTION_FAILURE_MSG, e);
             throw new ConnectionFailureException(CONNECTION_FAILURE_MSG, e);
         }
+    }
+
+    private boolean tableExists() {
+        return false;
     }
 }
