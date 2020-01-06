@@ -97,10 +97,25 @@ public class PostgresUserDirectory implements UserDirectory {
         }
     }
 
+    /**
+     * Executes a SQL update to insert a new user into the users and passwords tables.
+     * @param username User name of the new entry.
+     * @param email Email of the new entry.
+     * @param screeName Screen name of the new entry.
+     * @param password Password of the new entry.
+     * @throws ConnectionFailureException
+     * @throws UserAlreadyExistsException
+     * @throws PolicyFailureException
+     */
     @Override
     public void addUser(String username, String email, String screeName, String password) throws ConnectionFailureException, UserAlreadyExistsException, PolicyFailureException {
         final String INSERT_USERS = "INSERT INTO users (u_email, u_username, u_screenname, u_salt) VALUES (?, ?, ?, ?)";
         final String INSERT_PASSWORDS = "INSERT INTO passwords (p_uid, p_hashed) VALUES (?, ?)";
+
+        // make sure the user doesn't already exist
+        if (hasUser(username)) {
+            throw new UserAlreadyExistsException("User \"" + username + "\" already exists in the database.");
+        }
 
         try (Connection connection = connect()) {
             // remember the original auto commit so it can be restored at the end of the function

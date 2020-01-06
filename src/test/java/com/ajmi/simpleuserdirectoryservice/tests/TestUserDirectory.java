@@ -57,13 +57,41 @@ public abstract class TestUserDirectory {
         assertFalse(ud.hasUser(uname));
         try {
             ud.addUser(uname, "foo", "bar", "baz");
-        } catch (UserAlreadyExistsException e) {
-            // expected exception
         } catch (UserDirectoryException e) {
             // unexpected exception
             fail();
         }
         assertTrue(ud.hasUser(uname));
+    }
+
+    /**
+     * Tests that the addUser() method throws a UserAlreadyExists exception when the user already exists.
+     * @throws ConnectionFailureException
+     */
+    @Test
+    public void testAddUserExists() throws ConnectionFailureException {
+        UserDirectory ud = create();
+        String uname = username();
+
+        assertFalse(ud.hasUser(uname));
+        try {
+            ud.addUser(uname, "foo", "bar", "baz");
+        } catch (UserDirectoryException e) {
+            // unexpected exception
+            fail();
+        }
+        assertTrue(ud.hasUser(uname));
+        try {
+            ud.addUser(uname, "foo", "bar", "baz");
+        } catch (UserAlreadyExistsException e) {
+            // expected exception
+            assertTrue(true);
+            return;
+        } catch (UserDirectoryException e) {
+            // unexpected exception
+        }
+        // exception was not caught
+        fail();
     }
 
     /**
