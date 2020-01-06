@@ -38,6 +38,9 @@ public class PostgresUserDirectory implements UserDirectory {
     /** Password to log into the postgres database. */
     private final String _postgresPass;
 
+    /** Policy used do tetermine the vadility of usernames, emails, screen names, and passwords. */
+    private final Policy _policy;
+
     /**
      * Create a new PostgresUserDirectory with the credentials to log into the PostreSQL database.
      * @param host URL to the Postgres instance.
@@ -49,6 +52,27 @@ public class PostgresUserDirectory implements UserDirectory {
         _postgresURL = String.format("jdbc:postgresql://%s/%s", host, database);
         _postgresUser = user;
         _postgresPass = pass;
+        _policy = new Policy() {
+            @Override
+            public boolean checkUsername(String username) {
+                return true;
+            }
+
+            @Override
+            public boolean checkEmail(String email) {
+                return true;
+            }
+
+            @Override
+            public boolean checkScreenName(String screenName) {
+                return true;
+            }
+
+            @Override
+            public boolean checkPassword(String password) {
+                return true;
+            }
+        };
         // create tables if they don't already exist
         if (!tableExists("users")) {
             createTables();
@@ -117,7 +141,7 @@ public class PostgresUserDirectory implements UserDirectory {
             throw new UserAlreadyExistsException("User \"" + username + "\" already exists in the database.");
         }
         // make sure the username, email, screen name, or password pass the user directory's policy
-        Policy policy = getPolicy();
+        Policy policy = _policy;
         if (!policy.checkUsername(username)) {
             throw new PolicyFailureException("Username policy failure.");
         }
