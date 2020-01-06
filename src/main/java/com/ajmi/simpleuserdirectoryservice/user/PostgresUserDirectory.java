@@ -201,12 +201,48 @@ public class PostgresUserDirectory implements UserDirectory {
         } catch (SQLException e) {
             // error connecting
             LOGGER.log(Level.WARNING, CONNECTION_FAILURE_MSG, e);
+            throw new ConnectionFailureException(CONNECTION_FAILURE_MSG, e);
         }
     }
 
+    /**
+     *
+     * @param username User name of the user to remove.
+     * @return true if the user exists in the directory and the method completes execution, false if the directory does
+     * not have the specified user.
+     * @throws ConnectionFailureException if a SQLException occurs.
+     */
     @Override
     public boolean removeUser(String username) throws ConnectionFailureException {
-        return false;
+        final String REMOVE_USERS= "DELETE FROM users WHERE u_username=(?)";
+        if (!hasUser(username)) {
+            return false;
+        }
+        try (Connection connection = connect()) {
+            // remember the original auto commit so it can be restored at the end of the function
+            boolean originalAutoCommit = connection.getAutoCommit();
+            // don't commit any table updates until all updates were successful
+            connection.setAutoCommit(false);
+            try (PreparedStatement statement = connection.prepareStatement(REMOVE_USERS)) {
+                statement.setString(1, username);
+                if (statement.executeUpdate() == 0) {
+                    throw new SQLException(SQL_EXEC_FAILURE_MSG + statement.toString());
+                }
+                // update tables
+                connection.commit();
+            } catch (SQLException e) {
+                LOGGER.log(Level.WARNING, "Error removing user \""+username+"\": ", e);
+                // revert changes
+                connection.rollback();
+            } finally {
+                connection.setAutoCommit(originalAutoCommit);
+            }
+        } catch (SQLException e) {
+            // error connecting
+            LOGGER.log(Level.WARNING, CONNECTION_FAILURE_MSG, e);
+            throw new ConnectionFailureException(CONNECTION_FAILURE_MSG, e);
+        }
+        return true;
     }
 
     @Override
