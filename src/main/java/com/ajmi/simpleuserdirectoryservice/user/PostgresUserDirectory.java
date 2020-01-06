@@ -103,9 +103,9 @@ public class PostgresUserDirectory implements UserDirectory {
      * @param email Email of the new entry.
      * @param screeName Screen name of the new entry.
      * @param password Password of the new entry.
-     * @throws ConnectionFailureException
-     * @throws UserAlreadyExistsException
-     * @throws PolicyFailureException
+     * @throws ConnectionFailureException if a SQLException occurs.
+     * @throws UserAlreadyExistsException if the user directory already has a user with the specified name.
+     * @throws PolicyFailureException if the username, email, screen name, or password fail the directory's policy.
      */
     @Override
     public void addUser(String username, String email, String screeName, String password) throws ConnectionFailureException, UserAlreadyExistsException, PolicyFailureException {
@@ -115,6 +115,20 @@ public class PostgresUserDirectory implements UserDirectory {
         // make sure the user doesn't already exist
         if (hasUser(username)) {
             throw new UserAlreadyExistsException("User \"" + username + "\" already exists in the database.");
+        }
+        // make sure the username, email, screen name, or password pass the user directory's policy
+        Policy policy = getPolicy();
+        if (!policy.checkUsername(username)) {
+            throw new PolicyFailureException("Username policy failure.");
+        }
+        if (!policy.checkEmail(email)) {
+            throw new PolicyFailureException("Email policy failure.");
+        }
+        if (!policy.checkScreenName(screeName)) {
+            throw new PolicyFailureException("Screen name policy failure.");
+        }
+        if (!policy.checkPassword(password)) {
+            throw new PolicyFailureException("Password policy failure.");
         }
 
         try (Connection connection = connect()) {
