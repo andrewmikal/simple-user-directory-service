@@ -4,6 +4,7 @@ import sun.rmi.runtime.Log;
 
 import javax.xml.transform.Result;
 import java.sql.*;
+import java.util.ArrayList;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -245,13 +246,40 @@ public class PostgresUserDirectory implements UserDirectory {
         return true;
     }
 
+    /**
+     * Executes a SQL query to retrieve the usernames of all users in the directory.
+     * @return A String[] containing the usernames of all users in the directory.
+     * @throws ConnectionFailureException if a SQLException occurs.
+     */
     @Override
     public String[] getUsers() throws ConnectionFailureException {
-        return new String[0];
+        final String GET_USERS = "SELECT u_username FROM users";
+        // collection of usernames to be converted to an array and returned
+        ArrayList<String> usernames = new ArrayList<>();
+        try (Connection connection = connect()) {
+            // remember the original auto commit so it can be restored at the end of the function
+            boolean originalAutoCommit = connection.getAutoCommit();
+            // don't commit any table updates until all updates were successful
+            connection.setAutoCommit(false);
+            try (PreparedStatement statement = connection.prepareStatement(GET_USERS)) {
+                ResultSet result = statement.executeQuery();
+                while (result.next()) {
+                    usernames.add(result.getString(1));
+                }
+                // convert string array list into string array and return it
+                String[] usernamesArr = new String[usernames.size()];
+                usernamesArr = usernames.toArray(usernamesArr);
+                return usernamesArr;
+            }
+        } catch (SQLException e) {
+            // error connecting
+            LOGGER.log(Level.WARNING, CONNECTION_FAILURE_MSG, e);
+            throw new ConnectionFailureException(CONNECTION_FAILURE_MSG, e);
+        }
     }
 
     @Override
-    public Policy getPolicy() throws ConnectionFailureException {
+    public Policy getPolicy() {
         return null;
     }
 

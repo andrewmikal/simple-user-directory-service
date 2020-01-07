@@ -3,12 +3,14 @@ package com.ajmi.simpleuserdirectoryservice.tests;
 import com.ajmi.simpleuserdirectoryservice.user.*;
 import org.junit.Test;
 
+import java.lang.reflect.Array;
 import java.time.Clock;
 import java.time.Instant;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.time.format.FormatStyle;
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.Locale;
 
 import static junit.framework.TestCase.*;
@@ -129,6 +131,7 @@ public abstract class TestUserDirectory {
     public void testGetUsers() throws ConnectionFailureException {
         UserDirectory ud = create();
         String[] usernames = {"1"+username(), "2"+username(), "3"+username(), "4"+username(), "5"+username()};
+        HashSet userSet = new HashSet<>(Arrays.asList(usernames));
         for (String name : usernames) {
             try {
                 ud.addUser(name, "foo", "bar", "baz");
@@ -140,9 +143,19 @@ public abstract class TestUserDirectory {
         String[] users = ud.getUsers();
         Arrays.sort(usernames);
         Arrays.sort(users);
-        assertEquals(usernames.length, users.length);
+        // filter out users not created by this test case
+        String[] filteredUsers = new String[userSet.size()];
+        int filteredUserIndex = 0;
+        for (String user : users) {
+            if (userSet.contains(user)) {
+                filteredUsers[filteredUserIndex++] = user;
+                userSet.remove(user);
+            }
+        }
+        // assert that the two arrays of usernames are equal
+        assertEquals(usernames.length, filteredUsers.length);
         for (int i = 0; i < usernames.length; i++) {
-            assertEquals(usernames[i], users[i]);
+            assertEquals(usernames[i], filteredUsers[i]);
         }
     }
 
