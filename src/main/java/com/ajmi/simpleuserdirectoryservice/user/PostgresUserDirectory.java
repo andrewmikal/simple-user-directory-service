@@ -368,6 +368,12 @@ public class PostgresUserDirectory implements UserDirectory {
         }
     }
 
+    /**
+     * Checks if a table with the specified name exists in the database.
+     * @param tableName name of the table to check for.
+     * @return true if the table exists, false otherwise
+     * @throws ConnectionFailureException if a SQLException occurs.
+     */
     private boolean tableExists(String tableName) throws ConnectionFailureException {
         try (Connection connection = connect()) {
             try (ResultSet result = connection.getMetaData().getTables(null, null, tableName, null)) {
