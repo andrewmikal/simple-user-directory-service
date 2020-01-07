@@ -1,8 +1,5 @@
 package com.ajmi.simpleuserdirectoryservice.user;
 
-import sun.rmi.runtime.Log;
-
-import javax.xml.transform.Result;
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.logging.Level;
