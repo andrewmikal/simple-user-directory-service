@@ -280,9 +280,13 @@ public class PostgresUserDirectory implements UserDirectory {
         }
     }
 
+    /**
+     * Returns a reference to the directory's Policy field.
+     * @return reference to the directory's Policy field.
+     */
     @Override
     public Policy getPolicy() {
-        return null;
+        return _policy;
     }
 
     @Override
