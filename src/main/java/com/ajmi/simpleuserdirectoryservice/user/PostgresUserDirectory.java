@@ -109,11 +109,12 @@ public class PostgresUserDirectory implements UserDirectory {
         try (Connection connection = connect()) {
             try (PreparedStatement statement = connection.prepareStatement(USER_EXISTS)) {
                 statement.setString(1, username);
-                ResultSet result = statement.executeQuery();
-                if (!result.next()) {
-                    throw new SQLException(SQL_EXEC_FAILURE_MSG + statement.toString());
+                try (ResultSet result = statement.executeQuery()) {
+                    if (!result.next()) {
+                        throw new SQLException(SQL_EXEC_FAILURE_MSG + statement.toString());
+                    }
+                    return result.getInt(1) == 1;
                 }
-                return result.getInt(1)==1;
             }
         } catch (SQLException e) {
             String errorMsg = "Error checking if the user \""+username+"\" exists: ";
@@ -262,14 +263,15 @@ public class PostgresUserDirectory implements UserDirectory {
             // don't commit any table updates until all updates were successful
             connection.setAutoCommit(false);
             try (PreparedStatement statement = connection.prepareStatement(GET_USERS)) {
-                ResultSet result = statement.executeQuery();
-                while (result.next()) {
-                    usernames.add(result.getString(1));
+                try (ResultSet result = statement.executeQuery()) {
+                    while (result.next()) {
+                        usernames.add(result.getString(1));
+                    }
+                    // convert string array list into string array and return it
+                    String[] usernamesArr = new String[usernames.size()];
+                    usernamesArr = usernames.toArray(usernamesArr);
+                    return usernamesArr;
                 }
-                // convert string array list into string array and return it
-                String[] usernamesArr = new String[usernames.size()];
-                usernamesArr = usernames.toArray(usernamesArr);
-                return usernamesArr;
             }
         } catch (SQLException e) {
             // error connecting
