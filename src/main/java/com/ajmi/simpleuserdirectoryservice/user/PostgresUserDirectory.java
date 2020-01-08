@@ -295,7 +295,7 @@ public class PostgresUserDirectory implements UserDirectory {
      */
     @Override
     public boolean authenticateUser(String username, String password) throws ConnectionFailureException {
-        final String GET_ID = "SELECT u_id, salt FROM users WHERE u_id=(?)";
+        final String GET_ID = "SELECT u_id, u_salt FROM users WHERE u_username=(?)";
         final String GET_HASHED = "SELECT p_hashed FROM passwords WHERE p_uid=(?)";
         // if the user doesn't exist then the authentication fails
         if (!hasUser(username)) {
@@ -312,6 +312,7 @@ public class PostgresUserDirectory implements UserDirectory {
             try (PreparedStatement statement = connection.prepareStatement(GET_ID)) {
                 statement.setString(1, username);
                 try (ResultSet result = statement.executeQuery()) {
+                    result.next();
                     id = result.getInt(1);
                     salt = result.getString(2);
                 }
@@ -320,6 +321,7 @@ public class PostgresUserDirectory implements UserDirectory {
             try (PreparedStatement statement = connection.prepareStatement(GET_HASHED)) {
                 statement.setInt(1, id);
                 try (ResultSet result = statement.executeQuery()) {
+                    result.next();
                     hashed = result.getString(1);
                 }
             }
@@ -331,9 +333,33 @@ public class PostgresUserDirectory implements UserDirectory {
         }
     }
 
+    /**
+     * Executes a SQL query to retrieve the email and screen name of the specified user.
+     * @param username Username of the user to retrieve data on.
+     * @return a new UserData object from the result of the SQL query if the user exists, and null if the user does not
+     * exist in the directory.
+     * @throws ConnectionFailureException if a SQLException occurs.
+     */
     @Override
     public UserData getUserData(String username) throws ConnectionFailureException {
-        return null;
+        final String GET_DATA = "SELECT u_email, u_screenname FROM users WHERE u_username=(?)";
+        // if the user doesn't exist, return null
+        if (!hasUser(username)) {
+            return null;
+        }
+        try (Connection connection = connect()) {
+            try (PreparedStatement statement = connection.prepareStatement(GET_DATA)) {
+                statement.setString(1, username);
+                try (ResultSet result = statement.executeQuery()) {
+                    result.next();
+                    return new UserData(username, result.getString(1), result.getString(2));
+                }
+            }
+        } catch (SQLException e) {
+            // error connecting
+            LOGGER.log(Level.WARNING, CONNECTION_FAILURE_MSG, e);
+            throw new ConnectionFailureException(CONNECTION_FAILURE_MSG, e);
+        }
     }
 
     @Override
