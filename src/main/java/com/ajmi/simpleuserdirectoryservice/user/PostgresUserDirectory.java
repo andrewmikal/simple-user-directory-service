@@ -364,7 +364,18 @@ public class PostgresUserDirectory implements UserDirectory {
 
     @Override
     public void updateUsername(String username, String newUsername) throws ConnectionFailureException {
-
+        final String UPDATE_USERNAME = "UPDATE users SET u_username=(?) WHERE u_username=(?)";
+        try (Connection connection = connect()) {
+            try (PreparedStatement statement = connection.prepareStatement(UPDATE_USERNAME)) {
+                statement.setString(1, newUsername);
+                statement.setString(2, username);
+                statement.executeUpdate();
+            }
+        } catch (SQLException e) {
+            // error connecting
+            LOGGER.log(Level.WARNING, CONNECTION_FAILURE_MSG, e);
+            throw new ConnectionFailureException(CONNECTION_FAILURE_MSG, e);
+        }
     }
 
     @Override
@@ -385,7 +396,18 @@ public class PostgresUserDirectory implements UserDirectory {
 
     @Override
     public void updateScreenName(String username, String newScreenName) throws ConnectionFailureException {
-
+        final String UPDATE_SCREENNAME = "UPDATE users SET u_screenname=(?) WHERE u_username=(?)";
+        try (Connection connection = connect()) {
+            try (PreparedStatement statement = connection.prepareStatement(UPDATE_SCREENNAME)) {
+                statement.setString(1, newScreenName);
+                statement.setString(2, username);
+                statement.executeUpdate();
+            }
+        } catch (SQLException e) {
+            // error connecting
+            LOGGER.log(Level.WARNING, CONNECTION_FAILURE_MSG, e);
+            throw new ConnectionFailureException(CONNECTION_FAILURE_MSG, e);
+        }
     }
 
     @Override
