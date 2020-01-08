@@ -286,9 +286,49 @@ public class PostgresUserDirectory implements UserDirectory {
         return _policy;
     }
 
+    /**
+     * Checks that the given password matches the hashed password in the database when hashed with the same salt.
+     * @param username Username of user to authenticate.
+     * @param password Password used to authenticate the user.
+     * @return true if the hashed passwords match, false if they don't or if the user does not exist in the directory.
+     * @throws ConnectionFailureException if a SQLException occurs.
+     */
     @Override
     public boolean authenticateUser(String username, String password) throws ConnectionFailureException {
-        return false;
+        final String GET_ID = "SELECT u_id, salt FROM users WHERE u_id=(?)";
+        final String GET_HASHED = "SELECT p_hashed FROM passwords WHERE p_uid=(?)";
+        // if the user doesn't exist then the authentication fails
+        if (!hasUser(username)) {
+            return false;
+        }
+        try (Connection connection = connect()) {
+            // ID for the specified user in the database
+            int id;
+            // salt used to hash the specified user's password
+            String salt;
+            // hashed password found for the specified user in the database
+            String hashed;
+            // get user ID
+            try (PreparedStatement statement = connection.prepareStatement(GET_ID)) {
+                statement.setString(1, username);
+                try (ResultSet result = statement.executeQuery()) {
+                    id = result.getInt(1);
+                    salt = result.getString(2);
+                }
+            }
+            // get hashed password
+            try (PreparedStatement statement = connection.prepareStatement(GET_HASHED)) {
+                statement.setInt(1, id);
+                try (ResultSet result = statement.executeQuery()) {
+                    hashed = result.getString(1);
+                }
+            }
+            return PasswordCrypt.hashPassword(password, salt).equals(hashed);
+        } catch (SQLException e) {
+            // error connecting
+            LOGGER.log(Level.WARNING, CONNECTION_FAILURE_MSG, e);
+            throw new ConnectionFailureException(CONNECTION_FAILURE_MSG, e);
+        }
     }
 
     @Override
