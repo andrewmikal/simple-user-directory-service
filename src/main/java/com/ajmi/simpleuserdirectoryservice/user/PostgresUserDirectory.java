@@ -362,6 +362,12 @@ public class PostgresUserDirectory implements UserDirectory {
         }
     }
 
+    /**
+     * Updates the specified user in the database with a new username.
+     * @param username Username of the user to update.
+     * @param newUsername Username to change the user's current username to.
+     * @throws ConnectionFailureException if a SQLException occurs.
+     */
     @Override
     public void updateUsername(String username, String newUsername) throws ConnectionFailureException {
         final String UPDATE_USERNAME = "UPDATE users SET u_username=(?) WHERE u_username=(?)";
@@ -378,6 +384,12 @@ public class PostgresUserDirectory implements UserDirectory {
         }
     }
 
+    /**
+     * Updates the specified user in the database with a new email.
+     * @param username Username of the user to update.
+     * @param newEmail Email to change the user's current email to.
+     * @throws ConnectionFailureException if a SQLException occurs.
+     */
     @Override
     public void updateEmail(String username, String newEmail) throws ConnectionFailureException {
         final String UPDATE_EMAIL = "UPDATE users SET u_email=(?) WHERE u_username=(?)";
@@ -394,6 +406,12 @@ public class PostgresUserDirectory implements UserDirectory {
         }
     }
 
+    /**
+     * Updates the specified user in the database with a new screen name.
+     * @param username Username of the user to update.
+     * @param newScreenName Screen name to change the user's current screen name to.
+     * @throws ConnectionFailureException if a SQLException occurs.
+     */
     @Override
     public void updateScreenName(String username, String newScreenName) throws ConnectionFailureException {
         final String UPDATE_SCREENNAME = "UPDATE users SET u_screenname=(?) WHERE u_username=(?)";
@@ -410,9 +428,40 @@ public class PostgresUserDirectory implements UserDirectory {
         }
     }
 
+    /**
+     * Updates the specified user in the database with a new password.
+     * @param username Username of the user to update.
+     * @param newPassword Password to change the user's current password to.
+     * @throws ConnectionFailureException if a SQLException occurs.
+     */
     @Override
     public void updatePassword(String username, String newPassword) throws ConnectionFailureException {
-
+        final String GET_ID = "SELECT u_id, u_salt FROM users WHERE u_username=(?)";
+        final String UPDATE_PASSWORD = "UPDATE passwords SET p_hashed=(?) WHERE p_uid=(?)";
+        try (Connection connection = connect()) {
+            // ID for the specified user in the database
+            int id;
+            // salt used to hash the specified user's password
+            String salt;
+            // get user ID
+            try (PreparedStatement statement = connection.prepareStatement(GET_ID)) {
+                statement.setString(1, username);
+                try (ResultSet result = statement.executeQuery()) {
+                    result.next();
+                    id = result.getInt(1);
+                    salt = result.getString(2);
+                }
+            }
+            try (PreparedStatement statement = connection.prepareStatement(UPDATE_PASSWORD)) {
+                statement.setString(1, PasswordCrypt.hashPassword(newPassword, salt));
+                statement.setInt(2, id);
+                statement.executeUpdate();
+            }
+        } catch (SQLException e) {
+            // error connecting
+            LOGGER.log(Level.WARNING, CONNECTION_FAILURE_MSG, e);
+            throw new ConnectionFailureException(CONNECTION_FAILURE_MSG, e);
+        }
     }
 
     /**
