@@ -369,7 +369,18 @@ public class PostgresUserDirectory implements UserDirectory {
 
     @Override
     public void updateEmail(String username, String newEmail) throws ConnectionFailureException {
-
+        final String UPDATE_EMAIL = "UPDATE users SET u_email=(?) WHERE u_username=(?)";
+        try (Connection connection = connect()) {
+            try (PreparedStatement statement = connection.prepareStatement(UPDATE_EMAIL)) {
+                statement.setString(1, newEmail);
+                statement.setString(2, username);
+                statement.executeUpdate();
+            }
+        } catch (SQLException e) {
+            // error connecting
+            LOGGER.log(Level.WARNING, CONNECTION_FAILURE_MSG, e);
+            throw new ConnectionFailureException(CONNECTION_FAILURE_MSG, e);
+        }
     }
 
     @Override
