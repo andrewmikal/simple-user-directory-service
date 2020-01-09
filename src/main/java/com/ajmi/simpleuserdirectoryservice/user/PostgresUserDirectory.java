@@ -102,7 +102,8 @@ public class PostgresUserDirectory implements UserDirectory {
     @Override
     public boolean hasUser(String username) throws ConnectionFailureException {
         final String USER_EXISTS = "SELECT COUNT(1) FROM users WHERE u_username=(?)";
-
+        // boolean to return
+        boolean hasUser;
         try (Connection connection = connect()) {
             try (PreparedStatement statement = connection.prepareStatement(USER_EXISTS)) {
                 statement.setString(1, username);
@@ -110,7 +111,7 @@ public class PostgresUserDirectory implements UserDirectory {
                     if (!result.next()) {
                         throw new SQLException(SQL_EXEC_FAILURE_MSG + statement.toString());
                     }
-                    return result.getInt(1) == 1;
+                    hasUser = result.getInt(1) == 1;
                 }
             }
         } catch (SQLException e) {
@@ -118,6 +119,7 @@ public class PostgresUserDirectory implements UserDirectory {
             LOGGER.log(Level.WARNING, errorMsg, e);
             throw new ConnectionFailureException(errorMsg, e);
         }
+        return hasUser;
     }
 
     /**
@@ -207,41 +209,44 @@ public class PostgresUserDirectory implements UserDirectory {
     /**
      *
      * @param username User name of the user to remove.
-     * @return true if the user exists in the directory and the method completes execution, false if the directory does
-     * not have the specified user.
+     * @return true if the user exists in the directory and the user was removed from the directory, false if the
+     * directory does not have the specified user.
      * @throws ConnectionFailureException if a SQLException occurs.
      */
     @Override
     public boolean removeUser(String username) throws ConnectionFailureException {
         final String REMOVE_USERS= "DELETE FROM users WHERE u_username=(?)";
-        if (!hasUser(username)) {
-            return false;
-        }
-        try (Connection connection = connect()) {
-            // remember the original auto commit so it can be restored at the end of the function
-            boolean originalAutoCommit = connection.getAutoCommit();
-            // don't commit any table updates until all updates were successful
-            connection.setAutoCommit(false);
-            try (PreparedStatement statement = connection.prepareStatement(REMOVE_USERS)) {
-                statement.setString(1, username);
-                if (statement.executeUpdate() == 0) {
-                    throw new SQLException(SQL_EXEC_FAILURE_MSG + statement.toString());
+        // boolean to return
+        boolean userRemoved = false;
+        if (hasUser(username)) {
+            try (Connection connection = connect()) {
+                // remember the original auto commit so it can be restored at the end of the function
+                boolean originalAutoCommit = connection.getAutoCommit();
+                // don't commit any table updates until all updates were successful
+                connection.setAutoCommit(false);
+                try (PreparedStatement statement = connection.prepareStatement(REMOVE_USERS)) {
+                    statement.setString(1, username);
+                    if (statement.executeUpdate() == 0) {
+                        throw new SQLException(SQL_EXEC_FAILURE_MSG + statement.toString());
+                    }
+                    // update tables
+                    connection.commit();
+                    // return true since the user was successfully removed
+                    userRemoved = true;
+                } catch (SQLException e) {
+                    LOGGER.log(Level.WARNING, "Error removing user \""+username+"\": ", e);
+                    // revert changes
+                    connection.rollback();
+                } finally {
+                    connection.setAutoCommit(originalAutoCommit);
                 }
-                // update tables
-                connection.commit();
             } catch (SQLException e) {
-                LOGGER.log(Level.WARNING, "Error removing user \""+username+"\": ", e);
-                // revert changes
-                connection.rollback();
-            } finally {
-                connection.setAutoCommit(originalAutoCommit);
+                // error connecting
+                LOGGER.log(Level.WARNING, CONNECTION_FAILURE_MSG, e);
+                throw new ConnectionFailureException(CONNECTION_FAILURE_MSG, e);
             }
-        } catch (SQLException e) {
-            // error connecting
-            LOGGER.log(Level.WARNING, CONNECTION_FAILURE_MSG, e);
-            throw new ConnectionFailureException(CONNECTION_FAILURE_MSG, e);
         }
-        return true;
+        return userRemoved;
     }
 
     /**
@@ -264,10 +269,6 @@ public class PostgresUserDirectory implements UserDirectory {
                     while (result.next()) {
                         usernames.add(result.getString(1));
                     }
-                    // convert string array list into string array and return it
-                    String[] usernamesArr = new String[usernames.size()];
-                    usernamesArr = usernames.toArray(usernamesArr);
-                    return usernamesArr;
                 }
             }
         } catch (SQLException e) {
@@ -275,6 +276,10 @@ public class PostgresUserDirectory implements UserDirectory {
             LOGGER.log(Level.WARNING, CONNECTION_FAILURE_MSG, e);
             throw new ConnectionFailureException(CONNECTION_FAILURE_MSG, e);
         }
+        // convert string array list into string array and return it
+        String[] usernamesArr = new String[usernames.size()];
+        usernamesArr = usernames.toArray(usernamesArr);
+        return usernamesArr;
     }
 
     /**
@@ -297,40 +302,42 @@ public class PostgresUserDirectory implements UserDirectory {
     public boolean authenticateUser(String username, String password) throws ConnectionFailureException {
         final String GET_ID = "SELECT u_id, u_salt FROM users WHERE u_username=(?)";
         final String GET_HASHED = "SELECT p_hashed FROM passwords WHERE p_uid=(?)";
+        // boolean to return
+        boolean authenticated = false;
         // if the user doesn't exist then the authentication fails
-        if (!hasUser(username)) {
-            return false;
-        }
-        try (Connection connection = connect()) {
-            // ID for the specified user in the database
-            int id;
-            // salt used to hash the specified user's password
-            String salt;
-            // hashed password found for the specified user in the database
-            String hashed;
-            // get user ID
-            try (PreparedStatement statement = connection.prepareStatement(GET_ID)) {
-                statement.setString(1, username);
-                try (ResultSet result = statement.executeQuery()) {
-                    result.next();
-                    id = result.getInt(1);
-                    salt = result.getString(2);
+        if (hasUser(username)) {
+            try (Connection connection = connect()) {
+                // ID for the specified user in the database
+                int id;
+                // salt used to hash the specified user's password
+                String salt;
+                // hashed password found for the specified user in the database
+                String hashed;
+                // get user ID
+                try (PreparedStatement statement = connection.prepareStatement(GET_ID)) {
+                    statement.setString(1, username);
+                    try (ResultSet result = statement.executeQuery()) {
+                        result.next();
+                        id = result.getInt(1);
+                        salt = result.getString(2);
+                    }
                 }
-            }
-            // get hashed password
-            try (PreparedStatement statement = connection.prepareStatement(GET_HASHED)) {
-                statement.setInt(1, id);
-                try (ResultSet result = statement.executeQuery()) {
-                    result.next();
-                    hashed = result.getString(1);
+                // get hashed password
+                try (PreparedStatement statement = connection.prepareStatement(GET_HASHED)) {
+                    statement.setInt(1, id);
+                    try (ResultSet result = statement.executeQuery()) {
+                        result.next();
+                        hashed = result.getString(1);
+                    }
                 }
+                authenticated = PasswordCrypt.hashPassword(password, salt).equals(hashed);
+            } catch (SQLException e) {
+                // error connecting
+                LOGGER.log(Level.WARNING, CONNECTION_FAILURE_MSG, e);
+                throw new ConnectionFailureException(CONNECTION_FAILURE_MSG, e);
             }
-            return PasswordCrypt.hashPassword(password, salt).equals(hashed);
-        } catch (SQLException e) {
-            // error connecting
-            LOGGER.log(Level.WARNING, CONNECTION_FAILURE_MSG, e);
-            throw new ConnectionFailureException(CONNECTION_FAILURE_MSG, e);
         }
+        return authenticated;
     }
 
     /**
@@ -343,23 +350,24 @@ public class PostgresUserDirectory implements UserDirectory {
     @Override
     public UserData getUserData(String username) throws ConnectionFailureException {
         final String GET_DATA = "SELECT u_email, u_screenname FROM users WHERE u_username=(?)";
-        // if the user doesn't exist, return null
-        if (!hasUser(username)) {
-            return null;
-        }
-        try (Connection connection = connect()) {
-            try (PreparedStatement statement = connection.prepareStatement(GET_DATA)) {
-                statement.setString(1, username);
-                try (ResultSet result = statement.executeQuery()) {
-                    result.next();
-                    return new UserData(username, result.getString(1), result.getString(2));
+        // UserData object to return. if the user doesn't exist, return null
+        UserData data = null;
+        if (hasUser(username)) {
+            try (Connection connection = connect()) {
+                try (PreparedStatement statement = connection.prepareStatement(GET_DATA)) {
+                    statement.setString(1, username);
+                    try (ResultSet result = statement.executeQuery()) {
+                        result.next();
+                        data = new UserData(username, result.getString(1), result.getString(2));
+                    }
                 }
+            } catch (SQLException e) {
+                // error connecting
+                LOGGER.log(Level.WARNING, CONNECTION_FAILURE_MSG, e);
+                throw new ConnectionFailureException(CONNECTION_FAILURE_MSG, e);
             }
-        } catch (SQLException e) {
-            // error connecting
-            LOGGER.log(Level.WARNING, CONNECTION_FAILURE_MSG, e);
-            throw new ConnectionFailureException(CONNECTION_FAILURE_MSG, e);
         }
+        return data;
     }
 
     /**
@@ -520,14 +528,17 @@ public class PostgresUserDirectory implements UserDirectory {
      * @throws ConnectionFailureException if a SQLException occurs.
      */
     private boolean tableExists(String tableName) throws ConnectionFailureException {
+        // boolean to return
+        boolean tableExists;
         try (Connection connection = connect()) {
             try (ResultSet result = connection.getMetaData().getTables(null, null, tableName, null)) {
                 // return true if the table exists, false if it doesn't
-                return result.next();
+                tableExists = result.next();
             }
         } catch (SQLException e) {
             LOGGER.log(Level.WARNING, CONNECTION_FAILURE_MSG, e);
             throw new ConnectionFailureException(CONNECTION_FAILURE_MSG, e);
         }
+        return tableExists;
     }
 }
