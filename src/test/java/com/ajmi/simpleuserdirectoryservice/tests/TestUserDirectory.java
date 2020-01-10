@@ -248,6 +248,15 @@ public abstract class TestUserDirectory {
     }
 
     /**
+     * Tests updateUsername() when the specified user doesn't exist.
+     */
+    @Test
+    public void testUpdateUsernameDNE() throws ConnectionFailureException {
+        UserDirectory ud = create();
+        ud.updateUsername(username()+"thisshoudln'texist", username()+"thisshoudln'tbehere");
+    }
+
+    /**
      * Tests updateEmail().
      */
     @Test
@@ -270,6 +279,15 @@ public abstract class TestUserDirectory {
 
         assertEquals(ud.getUserData(user), new UserData(user, newEmail, screen));
         assertTrue(ud.authenticateUser(user, pass));
+    }
+
+    /**
+     * Tests updateEmail() when the specified user doesn't exist.
+     */
+    @Test
+    public void testUpdateEmailDNE() throws ConnectionFailureException {
+        UserDirectory ud = create();
+        ud.updateEmail(username()+"thisshoudln'texist", username()+"thisshoudln'tbehere");
     }
 
     /**
@@ -298,6 +316,15 @@ public abstract class TestUserDirectory {
     }
 
     /**
+     * Tests updateScreenName() when the specified user doesn't exist.
+     */
+    @Test
+    public void testUpdateScreenNameDNE() throws ConnectionFailureException {
+        UserDirectory ud = create();
+        ud.updateScreenName(username()+"thisshoudln'texist", username()+"thisshoudln'tbehere");
+    }
+
+    /**
      * Tests updatePassword().
      */
     @Test
@@ -320,5 +347,14 @@ public abstract class TestUserDirectory {
 
         assertEquals(ud.getUserData(user), new UserData(user, email, screen));
         assertTrue(ud.authenticateUser(user, newPass));
+    }
+
+    /**
+     * Tests updatePassword() when the specified user doesn't exist.
+     */
+    @Test
+    public void testUpdatePasswordDNE() throws ConnectionFailureException {
+        UserDirectory ud = create();
+        ud.updatePassword(username()+"thisshoudln'texist", username()+"thisshoudln'tbehere");
     }
 }

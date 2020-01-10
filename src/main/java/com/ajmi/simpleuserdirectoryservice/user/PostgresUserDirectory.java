@@ -425,18 +425,20 @@ public class PostgresUserDirectory implements UserDirectory {
      */
     @Override
     public void updatePassword(String username, String newPassword) throws ConnectionFailureException {
-        try (Connection connection = connect()) {
-            // get user ID and salt
-            Pair<Integer, String> idAndSalt = fetchIDAndSalt(username);
-            try (PreparedStatement statement = connection.prepareStatement(UPDATE_PASSWORD)) {
-                statement.setString(1, PasswordCrypt.hashPassword(newPassword, idAndSalt.getValue()));
-                statement.setInt(2, idAndSalt.getKey());
-                statement.executeUpdate();
+        if (hasUser(username)) {
+            try (Connection connection = connect()) {
+                // get user ID and salt
+                Pair<Integer, String> idAndSalt = fetchIDAndSalt(username);
+                try (PreparedStatement statement = connection.prepareStatement(UPDATE_PASSWORD)) {
+                    statement.setString(1, PasswordCrypt.hashPassword(newPassword, idAndSalt.getValue()));
+                    statement.setInt(2, idAndSalt.getKey());
+                    statement.executeUpdate();
+                }
+            } catch (SQLException e) {
+                // error connecting
+                LOGGER.log(Level.WARNING, CONNECTION_FAILURE_MSG, e);
+                throw new ConnectionFailureException(CONNECTION_FAILURE_MSG, e);
             }
-        } catch (SQLException e) {
-            // error connecting
-            LOGGER.log(Level.WARNING, CONNECTION_FAILURE_MSG, e);
-            throw new ConnectionFailureException(CONNECTION_FAILURE_MSG, e);
         }
     }
 
@@ -515,16 +517,18 @@ public class PostgresUserDirectory implements UserDirectory {
      * @throws ConnectionFailureException if a SQLException occurs.
      */
     private void updateValue(String username, String newValue, String sql) throws ConnectionFailureException {
-        try (Connection connection = connect()) {
-            try (PreparedStatement statement = connection.prepareStatement(sql)) {
-                statement.setString(1, newValue);
-                statement.setString(2, username);
-                statement.executeUpdate();
+        if (hasUser(username)) {
+            try (Connection connection = connect()) {
+                try (PreparedStatement statement = connection.prepareStatement(sql)) {
+                    statement.setString(1, newValue);
+                    statement.setString(2, username);
+                    statement.executeUpdate();
+                }
+            } catch (SQLException e) {
+                // error connecting
+                LOGGER.log(Level.WARNING, CONNECTION_FAILURE_MSG, e);
+                throw new ConnectionFailureException(CONNECTION_FAILURE_MSG, e);
             }
-        } catch (SQLException e) {
-            // error connecting
-            LOGGER.log(Level.WARNING, CONNECTION_FAILURE_MSG, e);
-            throw new ConnectionFailureException(CONNECTION_FAILURE_MSG, e);
         }
     }
 
