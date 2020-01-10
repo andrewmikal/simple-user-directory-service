@@ -57,11 +57,21 @@ public interface UserDirectory {
     /**
      * Validate that the given username matches the given password in the user directory.
      * @param username Username of user to authenticate.
-     * @param password Password used to authenticate the user.
+     * @param password Password
      * @return Returns true if the username and password combination is valid, false otherwise.
      * @throws ConnectionFailureException Thrown when a connection-related error occurs.
      */
     boolean authenticateUser(String username, String password) throws ConnectionFailureException;
+
+    /**
+     * Validate that the given username matches the given password in the user directory.
+     * @param username of user to authenticate.
+     * @param password used to authenticate the user.
+     * @return an Authentication enum indicating if the username password combination was valid, and if not, what field
+     * caused the authentication failure.
+     * @throws ConnectionFailureException if a connection-related error occurs.
+     */
+    Authentication authenticateUserDetailed(String username, String password) throws ConnectionFailureException;
 
     /**
      * Retrieve data on the specified user.
