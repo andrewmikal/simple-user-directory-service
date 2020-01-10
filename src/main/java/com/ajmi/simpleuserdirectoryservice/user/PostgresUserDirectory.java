@@ -26,9 +26,37 @@ public class PostgresUserDirectory implements UserDirectory {
 
     /** String logged when SQL execution fails. */
     private static final String SQL_EXEC_FAILURE_MSG = "Error executing SQL statement: ";
-
     /** String logged when SQL connection fails. */
     private static final String CONNECTION_FAILURE_MSG = "Failed to connect to Postgres database: ";
+
+    /** SQL statement for adding a new user to the users table in the database. */
+    private static final String INSERT_USERS = "INSERT INTO users (u_email, u_username, u_screenname, u_salt) VALUES (?, ?, ?, ?)";
+    /** SQL statement for adding a new user to the passwords table in the database. */
+    private static final String INSERT_PASSWORDS = "INSERT INTO passwords (p_uid, p_hashed) VALUES (?, ?)";
+    /** SQL statement for removing a user from the database. */
+    private static final String REMOVE_USERS= "DELETE FROM users WHERE u_username=(?)";
+    /** SQL statement for retrieving the usernames of all users in the database. */
+    private static final String GET_USERS = "SELECT u_username FROM users";
+    /** SQL statement for retrieving the password for a specific user in the database. */
+    private static final String GET_HASHED = "SELECT p_hashed FROM passwords WHERE p_uid=(?)";
+    /** SQL statement for retrieving the email and screen name for a specific user in the database. */
+    private static final String GET_DATA = "SELECT u_email, u_screenname FROM users WHERE u_username=(?)";
+    /** SQL statement for changing a specific user's username. */
+    private static final String UPDATE_USERNAME = "UPDATE users SET u_username=(?) WHERE u_username=(?)";
+    /** SQL statement for changing a specific user's email. */
+    private static final String UPDATE_EMAIL = "UPDATE users SET u_email=(?) WHERE u_username=(?)";
+    /** SQL statement for changing a specific user's screen name. */
+    private static final String UPDATE_SCREENNAME = "UPDATE users SET u_screenname=(?) WHERE u_username=(?)";
+    /** SQL statement for changing a specific user's password. */
+    private static final String UPDATE_PASSWORD = "UPDATE passwords SET p_hashed=(?) WHERE p_uid=(?)";
+    /** SQL statement to create the 'users' table in the database. */
+    private static final String CREATE_USERS_TABLE = "CREATE TABLE users (u_id SERIAL PRIMARY KEY, u_email TEXT, u_username TEXT NOT NULL UNIQUE, u_screenname TEXT NOT NULL, u_salt TEXT NOT NULL);";
+    /** SQL statement to create the `passwords` table in the database. */
+    private static final String CREATE_PASSWORDS_TABLE = "CREATE TABLE passwords (p_uid INTEGER PRIMARY KEY, p_hashed CHAR(128) NOT NULL);";
+    /** SQL statement to add a cascading delete to the passwords table. */
+    private static final String PASSWORDS_ADD_CONSTRAINT = "ALTER TABLE passwords ADD CONSTRAINT passwords_p_uid_fkey FOREIGN KEY (p_uid) REFERENCES users (u_id) ON DELETE CASCADE;";
+    /** SQL statement to fetch the id anf salt of a specific user. */
+    private static final String GET_ID_AND_SALT = "SELECT u_id, u_salt FROM users WHERE u_username=(?)";
 
     /** URL to the postgres database. */
     private final String _postgresURL;
@@ -135,9 +163,6 @@ public class PostgresUserDirectory implements UserDirectory {
      */
     @Override
     public void addUser(String username, String email, String screeName, String password) throws ConnectionFailureException, UserAlreadyExistsException, PolicyFailureException {
-        final String INSERT_USERS = "INSERT INTO users (u_email, u_username, u_screenname, u_salt) VALUES (?, ?, ?, ?)";
-        final String INSERT_PASSWORDS = "INSERT INTO passwords (p_uid, p_hashed) VALUES (?, ?)";
-
         // make sure the user doesn't already exist
         if (hasUser(username)) {
             throw new UserAlreadyExistsException("User \"" + username + "\" already exists in the database.");
@@ -216,7 +241,6 @@ public class PostgresUserDirectory implements UserDirectory {
      */
     @Override
     public boolean removeUser(String username) throws ConnectionFailureException {
-        final String REMOVE_USERS= "DELETE FROM users WHERE u_username=(?)";
         // boolean to return
         boolean userRemoved = false;
         if (hasUser(username)) {
@@ -257,7 +281,6 @@ public class PostgresUserDirectory implements UserDirectory {
      */
     @Override
     public String[] getUsers() throws ConnectionFailureException {
-        final String GET_USERS = "SELECT u_username FROM users";
         // collection of usernames to be converted to an array and returned
         ArrayList<String> usernames = new ArrayList<>();
         try (Connection connection = connect()) {
@@ -301,7 +324,6 @@ public class PostgresUserDirectory implements UserDirectory {
      */
     @Override
     public boolean authenticateUser(String username, String password) throws ConnectionFailureException {
-        final String GET_HASHED = "SELECT p_hashed FROM passwords WHERE p_uid=(?)";
         // boolean to return
         boolean authenticated = false;
         // if the user doesn't exist then the authentication fails
@@ -342,7 +364,6 @@ public class PostgresUserDirectory implements UserDirectory {
      */
     @Override
     public UserData getUserData(String username) throws ConnectionFailureException {
-        final String GET_DATA = "SELECT u_email, u_screenname FROM users WHERE u_username=(?)";
         // UserData object to return. if the user doesn't exist, return null
         UserData data = null;
         if (hasUser(username)) {
@@ -371,7 +392,6 @@ public class PostgresUserDirectory implements UserDirectory {
      */
     @Override
     public void updateUsername(String username, String newUsername) throws ConnectionFailureException {
-        final String UPDATE_USERNAME = "UPDATE users SET u_username=(?) WHERE u_username=(?)";
         updateValue(username, newUsername, UPDATE_USERNAME);
     }
 
@@ -383,7 +403,6 @@ public class PostgresUserDirectory implements UserDirectory {
      */
     @Override
     public void updateEmail(String username, String newEmail) throws ConnectionFailureException {
-        final String UPDATE_EMAIL = "UPDATE users SET u_email=(?) WHERE u_username=(?)";
         updateValue(username, newEmail, UPDATE_EMAIL);
     }
 
@@ -395,7 +414,6 @@ public class PostgresUserDirectory implements UserDirectory {
      */
     @Override
     public void updateScreenName(String username, String newScreenName) throws ConnectionFailureException {
-        final String UPDATE_SCREENNAME = "UPDATE users SET u_screenname=(?) WHERE u_username=(?)";
         updateValue(username, newScreenName, UPDATE_SCREENNAME);
     }
 
@@ -407,7 +425,6 @@ public class PostgresUserDirectory implements UserDirectory {
      */
     @Override
     public void updatePassword(String username, String newPassword) throws ConnectionFailureException {
-        final String UPDATE_PASSWORD = "UPDATE passwords SET p_hashed=(?) WHERE p_uid=(?)";
         try (Connection connection = connect()) {
             // get user ID and salt
             Pair<Integer, String> idAndSalt = fetchIDAndSalt(username);
@@ -436,9 +453,6 @@ public class PostgresUserDirectory implements UserDirectory {
      * Creates the users and passwords tables in the database if they don't already exist.
      */
     private void createTables() throws ConnectionFailureException{
-        final String CREATE_USERS_TABLE = "CREATE TABLE users (u_id SERIAL PRIMARY KEY, u_email TEXT, u_username TEXT NOT NULL UNIQUE, u_screenname TEXT NOT NULL, u_salt TEXT NOT NULL);";
-        final String CREATE_PASSWORDS_TABLE = "CREATE TABLE passwords (p_uid INTEGER PRIMARY KEY, p_hashed CHAR(128) NOT NULL);";
-        final String PASSWORDS_ADD_CONSTRAINT = "ALTER TABLE passwords ADD CONSTRAINT passwords_p_uid_fkey FOREIGN KEY (p_uid) REFERENCES users (u_id) ON DELETE CASCADE;";
         try (Connection connection = connect()) {
             // remember the original auto commit so it can be restored at the end of the function
             boolean originalAutoCommit = connection.getAutoCommit();
@@ -521,13 +535,12 @@ public class PostgresUserDirectory implements UserDirectory {
      * @throws ConnectionFailureException if s SQLException occurs.
      */
     private Pair<Integer, String> fetchIDAndSalt(String username) throws ConnectionFailureException {
-        final String GET_ID = "SELECT u_id, u_salt FROM users WHERE u_username=(?)";
         // pair of ID and salt to return
         Pair<Integer, String> idAndSalt = null;
         // if the directory doesn't have the specified user, return null
         if (hasUser(username)) {
             try (Connection connection = connect()) {
-                try (PreparedStatement statement = connection.prepareStatement(GET_ID)) {
+                try (PreparedStatement statement = connection.prepareStatement(GET_ID_AND_SALT)) {
                     statement.setString(1, username);
                     try (ResultSet result = statement.executeQuery()) {
                         result.next();
