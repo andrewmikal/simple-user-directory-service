@@ -373,7 +373,7 @@ public abstract class TestUserDirectory {
         ud.setPolicy(new Policy() {
             @Override
             public boolean checkUsername(String username) {
-                return !username.equals(username+bad);
+                return !username.equals(badUser);
             }
 
             @Override
