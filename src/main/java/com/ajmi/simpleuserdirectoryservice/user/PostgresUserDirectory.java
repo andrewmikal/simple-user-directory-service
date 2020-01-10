@@ -4,6 +4,7 @@ import java.sql.*;
 import java.util.ArrayList;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javafx.util.Pair;
 
 /**
  * User Directory using a PostgreSQL Database.
@@ -300,28 +301,20 @@ public class PostgresUserDirectory implements UserDirectory {
      */
     @Override
     public boolean authenticateUser(String username, String password) throws ConnectionFailureException {
-        final String GET_ID = "SELECT u_id, u_salt FROM users WHERE u_username=(?)";
         final String GET_HASHED = "SELECT p_hashed FROM passwords WHERE p_uid=(?)";
         // boolean to return
         boolean authenticated = false;
         // if the user doesn't exist then the authentication fails
         if (hasUser(username)) {
             try (Connection connection = connect()) {
-                // ID for the specified user in the database
-                int id;
-                // salt used to hash the specified user's password
-                String salt;
                 // hashed password found for the specified user in the database
                 String hashed;
-                // get user ID
-                try (PreparedStatement statement = connection.prepareStatement(GET_ID)) {
-                    statement.setString(1, username);
-                    try (ResultSet result = statement.executeQuery()) {
-                        result.next();
-                        id = result.getInt(1);
-                        salt = result.getString(2);
-                    }
-                }
+                // get user ID and salt
+                Pair<Integer, String> idAndSalt = fetchIDAndSalt(username);
+                // ID for the specified user in the database
+                int id = idAndSalt.getKey();
+                // salt used to hash the specified user's password
+                String salt = idAndSalt.getValue();
                 // get hashed password
                 try (PreparedStatement statement = connection.prepareStatement(GET_HASHED)) {
                     statement.setInt(1, id);
@@ -379,17 +372,7 @@ public class PostgresUserDirectory implements UserDirectory {
     @Override
     public void updateUsername(String username, String newUsername) throws ConnectionFailureException {
         final String UPDATE_USERNAME = "UPDATE users SET u_username=(?) WHERE u_username=(?)";
-        try (Connection connection = connect()) {
-            try (PreparedStatement statement = connection.prepareStatement(UPDATE_USERNAME)) {
-                statement.setString(1, newUsername);
-                statement.setString(2, username);
-                statement.executeUpdate();
-            }
-        } catch (SQLException e) {
-            // error connecting
-            LOGGER.log(Level.WARNING, CONNECTION_FAILURE_MSG, e);
-            throw new ConnectionFailureException(CONNECTION_FAILURE_MSG, e);
-        }
+        updateValue(username, newUsername, UPDATE_USERNAME);
     }
 
     /**
@@ -401,17 +384,7 @@ public class PostgresUserDirectory implements UserDirectory {
     @Override
     public void updateEmail(String username, String newEmail) throws ConnectionFailureException {
         final String UPDATE_EMAIL = "UPDATE users SET u_email=(?) WHERE u_username=(?)";
-        try (Connection connection = connect()) {
-            try (PreparedStatement statement = connection.prepareStatement(UPDATE_EMAIL)) {
-                statement.setString(1, newEmail);
-                statement.setString(2, username);
-                statement.executeUpdate();
-            }
-        } catch (SQLException e) {
-            // error connecting
-            LOGGER.log(Level.WARNING, CONNECTION_FAILURE_MSG, e);
-            throw new ConnectionFailureException(CONNECTION_FAILURE_MSG, e);
-        }
+        updateValue(username, newEmail, UPDATE_EMAIL);
     }
 
     /**
@@ -423,17 +396,7 @@ public class PostgresUserDirectory implements UserDirectory {
     @Override
     public void updateScreenName(String username, String newScreenName) throws ConnectionFailureException {
         final String UPDATE_SCREENNAME = "UPDATE users SET u_screenname=(?) WHERE u_username=(?)";
-        try (Connection connection = connect()) {
-            try (PreparedStatement statement = connection.prepareStatement(UPDATE_SCREENNAME)) {
-                statement.setString(1, newScreenName);
-                statement.setString(2, username);
-                statement.executeUpdate();
-            }
-        } catch (SQLException e) {
-            // error connecting
-            LOGGER.log(Level.WARNING, CONNECTION_FAILURE_MSG, e);
-            throw new ConnectionFailureException(CONNECTION_FAILURE_MSG, e);
-        }
+        updateValue(username, newScreenName, UPDATE_SCREENNAME);
     }
 
     /**
@@ -444,25 +407,13 @@ public class PostgresUserDirectory implements UserDirectory {
      */
     @Override
     public void updatePassword(String username, String newPassword) throws ConnectionFailureException {
-        final String GET_ID = "SELECT u_id, u_salt FROM users WHERE u_username=(?)";
         final String UPDATE_PASSWORD = "UPDATE passwords SET p_hashed=(?) WHERE p_uid=(?)";
         try (Connection connection = connect()) {
-            // ID for the specified user in the database
-            int id;
-            // salt used to hash the specified user's password
-            String salt;
-            // get user ID
-            try (PreparedStatement statement = connection.prepareStatement(GET_ID)) {
-                statement.setString(1, username);
-                try (ResultSet result = statement.executeQuery()) {
-                    result.next();
-                    id = result.getInt(1);
-                    salt = result.getString(2);
-                }
-            }
+            // get user ID and salt
+            Pair<Integer, String> idAndSalt = fetchIDAndSalt(username);
             try (PreparedStatement statement = connection.prepareStatement(UPDATE_PASSWORD)) {
-                statement.setString(1, PasswordCrypt.hashPassword(newPassword, salt));
-                statement.setInt(2, id);
+                statement.setString(1, PasswordCrypt.hashPassword(newPassword, idAndSalt.getValue()));
+                statement.setInt(2, idAndSalt.getKey());
                 statement.executeUpdate();
             }
         } catch (SQLException e) {
@@ -540,5 +491,55 @@ public class PostgresUserDirectory implements UserDirectory {
             throw new ConnectionFailureException(CONNECTION_FAILURE_MSG, e);
         }
         return tableExists;
+    }
+
+    /**
+     * Executes the given SQL statement to update a value for the specified user.
+     * @param username Username of the user to update.
+     * @param newValue New value to set the value to.
+     * @param sql SQL statement to execute.
+     * @throws ConnectionFailureException if a SQLException occurs.
+     */
+    private void updateValue(String username, String newValue, String sql) throws ConnectionFailureException {
+        try (Connection connection = connect()) {
+            try (PreparedStatement statement = connection.prepareStatement(sql)) {
+                statement.setString(1, newValue);
+                statement.setString(2, username);
+                statement.executeUpdate();
+            }
+        } catch (SQLException e) {
+            // error connecting
+            LOGGER.log(Level.WARNING, CONNECTION_FAILURE_MSG, e);
+            throw new ConnectionFailureException(CONNECTION_FAILURE_MSG, e);
+        }
+    }
+
+    /**
+     * Executes a SQL query to fetch the id and salt for a specified user.
+     * @param username Username of the user to fetch the id and salt for.
+     * @return the user's id and salt if the user exists in the directory, null otherwise.
+     * @throws ConnectionFailureException if s SQLException occurs.
+     */
+    private Pair<Integer, String> fetchIDAndSalt(String username) throws ConnectionFailureException {
+        final String GET_ID = "SELECT u_id, u_salt FROM users WHERE u_username=(?)";
+        // pair of ID and salt to return
+        Pair<Integer, String> idAndSalt = null;
+        // if the directory doesn't have the specified user, return null
+        if (hasUser(username)) {
+            try (Connection connection = connect()) {
+                try (PreparedStatement statement = connection.prepareStatement(GET_ID)) {
+                    statement.setString(1, username);
+                    try (ResultSet result = statement.executeQuery()) {
+                        result.next();
+                        idAndSalt = new Pair<>(result.getInt(1), result.getString(2));
+                    }
+                }
+            } catch (SQLException e) {
+                // error connecting
+                LOGGER.log(Level.WARNING, CONNECTION_FAILURE_MSG, e);
+                throw new ConnectionFailureException(CONNECTION_FAILURE_MSG, e);
+            }
+        }
+        return idAndSalt;
     }
 }
