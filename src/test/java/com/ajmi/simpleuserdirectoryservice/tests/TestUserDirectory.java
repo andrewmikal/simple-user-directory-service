@@ -357,4 +357,84 @@ public abstract class TestUserDirectory {
         UserDirectory ud = create();
         ud.updatePassword(username()+"thisshoudln'texist", username()+"thisshoudln'tbehere");
     }
+
+    /**
+     * Tests that a custom policy properly causes a PolicyFailureException when the policy is not met.
+     */
+    @Test
+    public void testCustomPolicy() throws ConnectionFailureException, UserAlreadyExistsException {
+        UserDirectory ud = create();
+        String user = username();
+        String good = "foo";
+        String bad = "";
+        String goodUser = user+good;
+        String badUser = user+bad;
+
+        ud.setPolicy(new Policy() {
+            @Override
+            public boolean checkUsername(String username) {
+                return !username.equals(badUser);
+            }
+
+            @Override
+            public boolean checkEmail(String email) {
+                return !email.equals(bad);
+            }
+
+            @Override
+            public boolean checkScreenName(String screenName) {
+                return !screenName.equals(bad);
+            }
+
+            @Override
+            public boolean checkPassword(String password) {
+                return !password.equals(bad);
+            }
+        });
+
+        boolean pass = false;
+
+        // test that valid user passes policy
+        try {
+            ud.addUser(goodUser, good, good, good);
+        } catch (PolicyFailureException e) {
+            // unexpected exception
+            fail();
+        }
+        assertTrue(ud.hasUser(goodUser));
+        ud.removeUser(goodUser);
+        assertFalse(ud.hasUser(goodUser));
+
+        // test that invalid username fails policy
+        try {
+            ud.addUser(badUser, good, good, good);
+        } catch (PolicyFailureException e) {
+            assertFalse(ud.hasUser(badUser));
+
+            // test that invalid email fails policy
+            try {
+                ud.addUser(goodUser, bad, good, good);
+            } catch (PolicyFailureException e1) {
+                assertFalse(ud.hasUser(goodUser));
+
+                // test that invalid screen name fails policy
+                try {
+                    ud.addUser(goodUser, good, bad, good);
+                } catch (PolicyFailureException e2) {
+                    assertFalse(ud.hasUser(goodUser));
+
+                    // test that invalid screen name fails policy
+                    try {
+                        ud.addUser(goodUser, good, good, bad);
+                    } catch (PolicyFailureException e3) {
+                        assertFalse(ud.hasUser(good));
+
+                        // test passed
+                        pass = true;
+                    }
+                }
+            }
+        }
+        assertTrue(pass);
+    }
 }
