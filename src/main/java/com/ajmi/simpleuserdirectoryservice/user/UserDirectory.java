@@ -48,6 +48,13 @@ public interface UserDirectory {
     Policy getPolicy() throws ConnectionFailureException;
 
     /**
+     * Sets the policy used to check the username, email, screen name, and password.
+     * @param policy Policy to set the directory's policy to.
+     * @throws ConnectionFailureException if a connection-related error occurs.
+     */
+    void setPolicy(Policy policy) throws ConnectionFailureException;
+
+    /**
      * Validate that the given username matches the given password in the user directory.
      * @param username Username of user to authenticate.
      * @param password Password used to authenticate the user.

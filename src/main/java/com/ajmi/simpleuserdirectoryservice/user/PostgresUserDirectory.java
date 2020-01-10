@@ -66,7 +66,7 @@ public class PostgresUserDirectory implements UserDirectory {
     private final String _postgresPass;
 
     /** Policy used do tetermine the vadility of usernames, emails, screen names, and passwords. */
-    private final Policy _policy;
+    private Policy _policy;
 
     /**
      * Create a new PostgresUserDirectory with the credentials to log into the PostreSQL database.
@@ -313,6 +313,15 @@ public class PostgresUserDirectory implements UserDirectory {
     @Override
     public Policy getPolicy() {
         return _policy;
+    }
+
+    /**
+     * Sets the directory's internal policy field.
+     * @param policy Policy to set the directory's policy to.
+     */
+    @Override
+    public void setPolicy(Policy policy) {
+        _policy = policy;
     }
 
     /**

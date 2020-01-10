@@ -122,6 +122,15 @@ public class EphemeralUserDirectory implements UserDirectory {
     }
 
     /**
+     * Sets the directory's internal policy field.
+     * @param policy Policy to set the directory's policy to.
+     */
+    @Override
+    public void setPolicy(Policy policy) {
+        _policy = policy;
+    }
+
+    /**
      * Checks that the provided password matches the password in the passwords hash map.
      * @param username Username of user to authenticate.
      * @param password Password used to authenticate the user.
