@@ -3,12 +3,14 @@ package com.ajmi.simpleuserdirectoryservice.tests;
 import com.ajmi.simpleuserdirectoryservice.user.*;
 import org.junit.Test;
 
+import java.lang.reflect.Array;
 import java.time.Clock;
 import java.time.Instant;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.time.format.FormatStyle;
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.Locale;
 
 import static junit.framework.TestCase.*;
@@ -18,28 +20,22 @@ import static junit.framework.TestCase.*;
  */
 public abstract class TestUserDirectory {
 
-    /** Used to format current time when creating new entries in the UserDirectory. */
-    private static final DateTimeFormatter formatter = DateTimeFormatter
-            .ofLocalizedDate(FormatStyle.FULL)
-            .withLocale(Locale.US)
-            .withZone(ZoneId.systemDefault());
+    /** Used for generating unique user names. */
+    private static int userNumber = 0;
 
-    /** Used to get the time in nano seconds. */
-    private static final Instant instant = Clock.systemDefaultZone().instant();
+    /**
+     * Creates a username created from the current time.
+     * @return a String to use as a username based on the current time.
+     */
+    private static synchronized String username() {
+        return "TestUserDirectory-Username:"+System.currentTimeMillis()+"-"+userNumber++;
+    }
 
     /**
      * Creates a new user directory.
      * @return a new UserDirectory object.
      */
     protected abstract UserDirectory create();
-
-    /**
-     * Creates a username created from the current time.
-     * @return a String to use as a username based on the current time.
-     */
-    private static String username() {
-        return "TestUserDirectory-Username:"+instant.getNano();//System.currentTimeMillis();//+formatter.format(Instant.now());
-    }
 
     /**
      * Tests the hasUser() method when the user does not exist in the directory.
@@ -63,13 +59,41 @@ public abstract class TestUserDirectory {
         assertFalse(ud.hasUser(uname));
         try {
             ud.addUser(uname, "foo", "bar", "baz");
-        } catch (UserAlreadyExistsException e) {
-            // expected exception
         } catch (UserDirectoryException e) {
             // unexpected exception
             fail();
         }
         assertTrue(ud.hasUser(uname));
+    }
+
+    /**
+     * Tests that the addUser() method throws a UserAlreadyExists exception when the user already exists.
+     * @throws ConnectionFailureException
+     */
+    @Test
+    public void testAddUserExists() throws ConnectionFailureException {
+        UserDirectory ud = create();
+        String uname = username();
+
+        assertFalse(ud.hasUser(uname));
+        try {
+            ud.addUser(uname, "foo", "bar", "baz");
+        } catch (UserDirectoryException e) {
+            // unexpected exception
+            fail();
+        }
+        assertTrue(ud.hasUser(uname));
+        try {
+            ud.addUser(uname, "foo", "bar", "baz");
+        } catch (UserAlreadyExistsException e) {
+            // expected exception
+            assertTrue(true);
+            return;
+        } catch (UserDirectoryException e) {
+            // unexpected exception
+        }
+        // exception was not caught
+        fail();
     }
 
     /**
@@ -107,6 +131,7 @@ public abstract class TestUserDirectory {
     public void testGetUsers() throws ConnectionFailureException {
         UserDirectory ud = create();
         String[] usernames = {"1"+username(), "2"+username(), "3"+username(), "4"+username(), "5"+username()};
+        HashSet userSet = new HashSet<>(Arrays.asList(usernames));
         for (String name : usernames) {
             try {
                 ud.addUser(name, "foo", "bar", "baz");
@@ -118,9 +143,19 @@ public abstract class TestUserDirectory {
         String[] users = ud.getUsers();
         Arrays.sort(usernames);
         Arrays.sort(users);
-        assertEquals(usernames.length, users.length);
+        // filter out users not created by this test case
+        String[] filteredUsers = new String[userSet.size()];
+        int filteredUserIndex = 0;
+        for (String user : users) {
+            if (userSet.contains(user)) {
+                filteredUsers[filteredUserIndex++] = user;
+                userSet.remove(user);
+            }
+        }
+        // assert that the two arrays of usernames are equal
+        assertEquals(usernames.length, filteredUsers.length);
         for (int i = 0; i < usernames.length; i++) {
-            assertEquals(usernames[i], users[i]);
+            assertEquals(usernames[i], filteredUsers[i]);
         }
     }
 
@@ -213,6 +248,15 @@ public abstract class TestUserDirectory {
     }
 
     /**
+     * Tests updateUsername() when the specified user doesn't exist.
+     */
+    @Test
+    public void testUpdateUsernameDNE() throws ConnectionFailureException {
+        UserDirectory ud = create();
+        ud.updateUsername(username()+"thisshoudln'texist", username()+"thisshoudln'tbehere");
+    }
+
+    /**
      * Tests updateEmail().
      */
     @Test
@@ -235,6 +279,15 @@ public abstract class TestUserDirectory {
 
         assertEquals(ud.getUserData(user), new UserData(user, newEmail, screen));
         assertTrue(ud.authenticateUser(user, pass));
+    }
+
+    /**
+     * Tests updateEmail() when the specified user doesn't exist.
+     */
+    @Test
+    public void testUpdateEmailDNE() throws ConnectionFailureException {
+        UserDirectory ud = create();
+        ud.updateEmail(username()+"thisshoudln'texist", username()+"thisshoudln'tbehere");
     }
 
     /**
@@ -263,6 +316,15 @@ public abstract class TestUserDirectory {
     }
 
     /**
+     * Tests updateScreenName() when the specified user doesn't exist.
+     */
+    @Test
+    public void testUpdateScreenNameDNE() throws ConnectionFailureException {
+        UserDirectory ud = create();
+        ud.updateScreenName(username()+"thisshoudln'texist", username()+"thisshoudln'tbehere");
+    }
+
+    /**
      * Tests updatePassword().
      */
     @Test
@@ -285,5 +347,14 @@ public abstract class TestUserDirectory {
 
         assertEquals(ud.getUserData(user), new UserData(user, email, screen));
         assertTrue(ud.authenticateUser(user, newPass));
+    }
+
+    /**
+     * Tests updatePassword() when the specified user doesn't exist.
+     */
+    @Test
+    public void testUpdatePasswordDNE() throws ConnectionFailureException {
+        UserDirectory ud = create();
+        ud.updatePassword(username()+"thisshoudln'texist", username()+"thisshoudln'tbehere");
     }
 }
