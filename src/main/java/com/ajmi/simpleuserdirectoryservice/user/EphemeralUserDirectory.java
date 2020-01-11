@@ -138,10 +138,29 @@ public class EphemeralUserDirectory implements UserDirectory {
      */
     @Override
     public boolean authenticateUser(String username, String password) {
+        return authenticateUserDetailed(username, password) == Authentication.VALID;
+    }
+
+    /**
+     * Checks that the provided password matches the password in the passwords hash map.
+     * @param username of user to authenticate.
+     * @param password used to authenticate the user.
+     * @return INVALID_USERNAME if the directory doesn't have the specified user, INVALID_PASSWORD if the given password
+     * and the password in the passwords hash map don't match, and VALID if they do.
+     */
+    @Override
+    public Authentication authenticateUserDetailed(String username, String password) {
+        Authentication authentication;
         if (hasUser(username)) {
-            return PasswordCrypt.hashPassword(password, _salts.get(username)).equals(_passwords.get(username));
+            if (PasswordCrypt.hashPassword(password, _salts.get(username)).equals(_passwords.get(username))) {
+                authentication = Authentication.VALID;
+            } else {
+                authentication = Authentication.INVALID_PASSWORD;
+            }
+        } else {
+            authentication = Authentication.INVALID_USERNAME;
         }
-        return false;
+        return authentication;
     }
 
     /**

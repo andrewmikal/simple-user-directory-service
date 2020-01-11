@@ -364,6 +364,11 @@ public class PostgresUserDirectory implements UserDirectory {
         return authenticated;
     }
 
+    @Override
+    public Authentication authenticateUserDetailed(String username, String password) throws ConnectionFailureException {
+        return null;
+    }
+
     /**
      * Executes a SQL query to retrieve the email and screen name of the specified user.
      * @param username Username of the user to retrieve data on.
