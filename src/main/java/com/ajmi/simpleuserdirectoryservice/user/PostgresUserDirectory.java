@@ -333,8 +333,21 @@ public class PostgresUserDirectory implements UserDirectory {
      */
     @Override
     public boolean authenticateUser(String username, String password) throws ConnectionFailureException {
-        // boolean to return
-        boolean authenticated = false;
+        return authenticateUserDetailed(username, password) == Authentication.VALID;
+    }
+
+    /**
+     * Checks that the given password matches the hashed password in the database when hashed with the same salt.
+     * @param username of user to authenticate.
+     * @param password used to authenticate the user.
+     * @return INVALID_USERNAME if the user doesn't exist in the directory, INVALID_PASSWORD if the passwords don't
+     * match, and VALID if the passwords do match.
+     * @throws ConnectionFailureException
+     */
+    @Override
+    public Authentication authenticateUserDetailed(String username, String password) throws ConnectionFailureException {
+        // to return
+        Authentication authentication;
         // if the user doesn't exist then the authentication fails
         if (hasUser(username)) {
             try (Connection connection = connect()) {
@@ -354,14 +367,20 @@ public class PostgresUserDirectory implements UserDirectory {
                         hashed = result.getString(1);
                     }
                 }
-                authenticated = PasswordCrypt.hashPassword(password, salt).equals(hashed);
+                if (PasswordCrypt.hashPassword(password, salt).equals(hashed)) {
+                    authentication = Authentication.VALID;
+                } else {
+                    authentication = Authentication.INVALID_PASSWORD;
+                }
             } catch (SQLException e) {
                 // error connecting
                 LOGGER.log(Level.WARNING, CONNECTION_FAILURE_MSG, e);
                 throw new ConnectionFailureException(CONNECTION_FAILURE_MSG, e);
             }
+        } else {
+            authentication = Authentication.INVALID_USERNAME;
         }
-        return authenticated;
+        return authentication;
     }
 
     /**

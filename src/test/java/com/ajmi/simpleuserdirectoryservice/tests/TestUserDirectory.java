@@ -437,4 +437,31 @@ public abstract class TestUserDirectory {
         }
         assertTrue(pass);
     }
+
+    /**
+     * Tests the authenticateUserDetailed() method.
+     */
+    @Test
+    public void testAuthenticateUserDetailed() throws ConnectionFailureException {
+        UserDirectory ud = create();
+
+        // create user
+        String user = username();
+        String pass = "pass";
+        try {
+            ud.addUser(user, "foo", "bar", pass);
+        } catch (UserAlreadyExistsException | PolicyFailureException e) {
+            // unexpected exception
+            fail();
+        }
+
+        // test when user doesn't exist
+        assertEquals(ud.authenticateUserDetailed(username()+"thisshoudn'texist", "pass"), Authentication.INVALID_USERNAME);
+
+        // test when password is wrong
+        assertEquals(ud.authenticateUserDetailed(user, "wrong-pass"), Authentication.INVALID_PASSWORD);
+
+        // test when valid
+        assertEquals(ud.authenticateUserDetailed(user, pass), Authentication.VALID);
+    }
 }
