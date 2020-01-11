@@ -425,24 +425,28 @@ public abstract class TestUserDirectory {
             ud.addUser(badUser, good, good, good);
         } catch (PolicyFailureException e) {
             assertFalse(ud.hasUser(badUser));
+            assertEquals(PolicyFailure.ILLEGAL_USERNAME, e.getFailure());
 
             // test that invalid email fails policy
             try {
                 ud.addUser(goodUser, bad, good, good);
             } catch (PolicyFailureException e1) {
                 assertFalse(ud.hasUser(goodUser));
+                assertEquals(PolicyFailure.ILLEGAL_EMAIL, e.getFailure());
 
                 // test that invalid screen name fails policy
                 try {
                     ud.addUser(goodUser, good, bad, good);
                 } catch (PolicyFailureException e2) {
                     assertFalse(ud.hasUser(goodUser));
+                    assertEquals(PolicyFailure.ILLEGAL_SCREEN_NAME, e.getFailure());
 
                     // test that invalid screen name fails policy
                     try {
                         ud.addUser(goodUser, good, good, bad);
                     } catch (PolicyFailureException e3) {
                         assertFalse(ud.hasUser(good));
+                        assertEquals(PolicyFailure.ILLEGAL_PASSWORD, e.getFailure());
 
                         // test passed
                         pass = true;
