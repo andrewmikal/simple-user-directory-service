@@ -2,6 +2,7 @@ package com.ajmi.simpleuserdirectoryservice.user;
 
 import java.sql.*;
 import java.util.ArrayList;
+import java.util.Optional;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javafx.util.Pair;
@@ -391,16 +392,16 @@ public class PostgresUserDirectory implements UserDirectory {
      * @throws ConnectionFailureException if a SQLException occurs.
      */
     @Override
-    public UserData getUserData(String username) throws ConnectionFailureException {
-        // UserData object to return. if the user doesn't exist, return null
-        UserData data = null;
+    public Optional<UserData> getUserData(String username) throws ConnectionFailureException {
+        // to return
+        Optional<UserData> data;
         if (hasUser(username)) {
             try (Connection connection = connect()) {
                 try (PreparedStatement statement = connection.prepareStatement(GET_DATA)) {
                     statement.setString(1, username);
                     try (ResultSet result = statement.executeQuery()) {
                         result.next();
-                        data = new UserData(username, result.getString(1), result.getString(2));
+                        data = Optional.of(new UserData(username, result.getString(1), result.getString(2)));
                     }
                 }
             } catch (SQLException e) {
@@ -408,6 +409,8 @@ public class PostgresUserDirectory implements UserDirectory {
                 LOGGER.log(Level.WARNING, CONNECTION_FAILURE_MSG, e);
                 throw new ConnectionFailureException(CONNECTION_FAILURE_MSG, e);
             }
+        } else {
+            data = Optional.empty();
         }
         return data;
     }

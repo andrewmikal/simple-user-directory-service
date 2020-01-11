@@ -1,6 +1,7 @@
 package com.ajmi.simpleuserdirectoryservice.user;
 
 import java.util.HashMap;
+import java.util.Optional;
 
 /**
  * User directory implemented as a Plain Old Java Object.
@@ -169,11 +170,11 @@ public class EphemeralUserDirectory implements UserDirectory {
      * @return A UserData object containing the data if the user exists, and null if the user does not exist.
      */
     @Override
-    public UserData getUserData(String username) {
+    public Optional<UserData> getUserData(String username) {
         if (hasUser(username)) {
-            return _users.get(username);
+            return Optional.of(_users.get(username));
         }
-        return null;
+        return Optional.empty();
     }
 
     /**
