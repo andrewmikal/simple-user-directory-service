@@ -171,16 +171,16 @@ public class PostgresUserDirectory implements UserDirectory {
         // make sure the username, email, screen name, or password pass the user directory's policy
         Policy policy = _policy;
         if (!policy.checkUsername(username)) {
-            throw new PolicyFailureException("Username policy failure.");
+            throw new PolicyFailureException("Username policy failure.", PolicyFailure.ILLEGAL_USERNAME);
         }
         if (!policy.checkEmail(email)) {
-            throw new PolicyFailureException("Email policy failure.");
+            throw new PolicyFailureException("Email policy failure.", PolicyFailure.ILLEGAL_EMAIL);
         }
         if (!policy.checkScreenName(screeName)) {
-            throw new PolicyFailureException("Screen name policy failure.");
+            throw new PolicyFailureException("Screen name policy failure.", PolicyFailure.ILLEGAL_SCREEN_NAME);
         }
         if (!policy.checkPassword(password)) {
-            throw new PolicyFailureException("Password policy failure.");
+            throw new PolicyFailureException("Password policy failure.", PolicyFailure.ILLEGAL_PASSWORD);
         }
 
         try (Connection connection = connect()) {

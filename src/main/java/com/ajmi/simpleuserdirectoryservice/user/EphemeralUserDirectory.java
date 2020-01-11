@@ -8,6 +8,9 @@ import java.util.Optional;
  */
 public class EphemeralUserDirectory implements UserDirectory {
 
+    /** Message used for exceptions caused by a failed policy. */
+    private static final String POLICY_FAILURE_MSG = "The entered data failed the directory's policy.";
+
     /** Hash map containing user data indexed by username. **/
     private HashMap<String, UserData> _users;
     /** Hash map containing user passwords indexed by username. **/
@@ -76,9 +79,19 @@ public class EphemeralUserDirectory implements UserDirectory {
             throw new UserAlreadyExistsException("A user with username \"" + username + "\" already exists.");
         }
         // check that the parameters meet the policy's requirements
-        if (!(_policy.checkUsername(username) && _policy.checkEmail(email) && _policy.checkScreenName(screeName) && _policy.checkPassword(password))) {
-            throw new PolicyFailureException("The entered data failed the directory's policy.");
+        if (!_policy.checkUsername(username)) {
+            throw new PolicyFailureException(POLICY_FAILURE_MSG, PolicyFailure.ILLEGAL_USERNAME);
         }
+        if (!_policy.checkEmail(email)) {
+            throw new PolicyFailureException(POLICY_FAILURE_MSG, PolicyFailure.ILLEGAL_EMAIL);
+        }
+        if (!_policy.checkScreenName(screeName)) {
+            throw new PolicyFailureException(POLICY_FAILURE_MSG, PolicyFailure.ILLEGAL_SCREEN_NAME);
+        }
+        if (!_policy.checkPassword(password)) {
+            throw new PolicyFailureException(POLICY_FAILURE_MSG, PolicyFailure.ILLEGAL_PASSWORD);
+        }
+
         _users.put(username, new UserData(username, email, screeName));
 
         String salt = PasswordCrypt.nextSalt();
