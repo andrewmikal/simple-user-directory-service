@@ -285,10 +285,6 @@ public class PostgresUserDirectory implements UserDirectory {
         // collection of usernames to be converted to an array and returned
         ArrayList<String> usernames = new ArrayList<>();
         try (Connection connection = connect()) {
-            // remember the original auto commit so it can be restored at the end of the function
-            boolean originalAutoCommit = connection.getAutoCommit();
-            // don't commit any table updates until all updates were successful
-            connection.setAutoCommit(false);
             try (PreparedStatement statement = connection.prepareStatement(GET_USERS)) {
                 try (ResultSet result = statement.executeQuery()) {
                     while (result.next()) {
