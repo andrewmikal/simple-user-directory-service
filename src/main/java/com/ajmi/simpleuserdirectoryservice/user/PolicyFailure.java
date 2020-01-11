@@ -4,7 +4,7 @@ package com.ajmi.simpleuserdirectoryservice.user;
  * Enum indicating what policy failed in a PolicyFailureException.
  */
 public enum PolicyFailure {
-    UNDEFINED,
+    UNDEFINED_FAILURE,
     ILLEGAL_USERNAME,
     ILLEGAL_EMAIL,
     ILLEGAL_SCREEN_NAME,

@@ -13,7 +13,7 @@ public class PolicyFailureException extends UserDirectoryException{
      */
     public PolicyFailureException(String message) {
         super(message);
-        _failure = PolicyFailure.UNDEFINED;
+        _failure = PolicyFailure.UNDEFINED_FAILURE;
     }
 
     /**
@@ -33,7 +33,7 @@ public class PolicyFailureException extends UserDirectoryException{
      */
     public PolicyFailureException(String message, Throwable cause) {
         super(message, cause);
-        _failure = PolicyFailure.UNDEFINED;
+        _failure = PolicyFailure.UNDEFINED_FAILURE;
     }
 
     /**
