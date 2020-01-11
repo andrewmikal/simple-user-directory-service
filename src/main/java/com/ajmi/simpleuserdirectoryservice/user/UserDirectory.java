@@ -1,5 +1,7 @@
 package com.ajmi.simpleuserdirectoryservice.user;
 
+import java.util.Optional;
+
 /**
  * Directory containing the user names, emails, scree names, and passwords of users.
  */
@@ -76,10 +78,10 @@ public interface UserDirectory {
     /**
      * Retrieve data on the specified user.
      * @param username Username of the user to retrieve data on.
-     * @return Returns a UserData object containing the user's data.
+     * @return an Optional<UserData> object containing the user's data if the user exists.
      * @throws ConnectionFailureException Thrown when a connection-related error occurs.
      */
-    UserData getUserData(String username) throws ConnectionFailureException;
+    Optional<UserData> getUserData(String username) throws ConnectionFailureException;
 
     /**
      * Updates the username of the specified user.

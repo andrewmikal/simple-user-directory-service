@@ -12,6 +12,7 @@ import java.time.format.FormatStyle;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Locale;
+import java.util.Optional;
 
 import static junit.framework.TestCase.*;
 
@@ -215,7 +216,9 @@ public abstract class TestUserDirectory {
             fail();
         }
 
-        assertEquals(ud.getUserData(user), new UserData(user, email, screen));
+        Optional<UserData> data = ud.getUserData(user);
+        assertTrue(data.isPresent());
+        assertEquals(data.get(), new UserData(user, email, screen));
     }
 
     /**
@@ -243,7 +246,10 @@ public abstract class TestUserDirectory {
         assertFalse(ud.hasUser(user));
         assertTrue(ud.hasUser(newUser));
 
-        assertEquals(ud.getUserData(newUser), new UserData(newUser, email, screen));
+        Optional<UserData> data = ud.getUserData(newUser);
+        assertTrue(data.isPresent());
+        assertEquals(data.get(), new UserData(newUser, email, screen));
+
         assertTrue(ud.authenticateUser(newUser, pass));
     }
 
@@ -277,7 +283,10 @@ public abstract class TestUserDirectory {
         }
         ud.updateEmail(user, newEmail);
 
-        assertEquals(ud.getUserData(user), new UserData(user, newEmail, screen));
+        Optional<UserData> data = ud.getUserData(user);
+        assertTrue(data.isPresent());
+        assertEquals(data.get(), new UserData(user, newEmail, screen));
+
         assertTrue(ud.authenticateUser(user, pass));
     }
 
@@ -311,7 +320,10 @@ public abstract class TestUserDirectory {
         }
         ud.updateScreenName(user, newScreen);
 
-        assertEquals(ud.getUserData(user), new UserData(user, email, newScreen));
+        Optional<UserData> data = ud.getUserData(user);
+        assertTrue(data.isPresent());
+        assertEquals(data.get(), new UserData(user, email, newScreen));
+
         assertTrue(ud.authenticateUser(user, pass));
     }
 
@@ -345,7 +357,10 @@ public abstract class TestUserDirectory {
         }
         ud.updatePassword(user, newPass);
 
-        assertEquals(ud.getUserData(user), new UserData(user, email, screen));
+        Optional<UserData> data = ud.getUserData(user);
+        assertTrue(data.isPresent());
+        assertEquals(data.get(), new UserData(user, email, screen));
+
         assertTrue(ud.authenticateUser(user, newPass));
     }
 
