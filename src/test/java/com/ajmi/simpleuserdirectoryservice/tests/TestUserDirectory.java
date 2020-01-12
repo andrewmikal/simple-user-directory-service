@@ -217,7 +217,7 @@ public abstract class TestUserDirectory {
 
         Optional<UserData> data = ud.getUserData(user);
         assertTrue(data.isPresent());
-        assertEquals(data.get(), new UserData(user, email, screen));
+        assertEquals(new UserData(user, email, screen), data.get());
     }
 
     /**
@@ -247,7 +247,7 @@ public abstract class TestUserDirectory {
 
         Optional<UserData> data = ud.getUserData(newUser);
         assertTrue(data.isPresent());
-        assertEquals(data.get(), new UserData(newUser, email, screen));
+        assertEquals(new UserData(newUser, email, screen), data.get());
 
         assertTrue(ud.authenticateUser(newUser, pass));
     }
@@ -284,7 +284,7 @@ public abstract class TestUserDirectory {
 
         Optional<UserData> data = ud.getUserData(user);
         assertTrue(data.isPresent());
-        assertEquals(data.get(), new UserData(user, newEmail, screen));
+        assertEquals(new UserData(user, newEmail, screen), data.get());
 
         assertTrue(ud.authenticateUser(user, pass));
     }
@@ -321,7 +321,7 @@ public abstract class TestUserDirectory {
 
         Optional<UserData> data = ud.getUserData(user);
         assertTrue(data.isPresent());
-        assertEquals(data.get(), new UserData(user, email, newScreen));
+        assertEquals(new UserData(user, email, newScreen), data.get());
 
         assertTrue(ud.authenticateUser(user, pass));
     }
@@ -358,7 +358,7 @@ public abstract class TestUserDirectory {
 
         Optional<UserData> data = ud.getUserData(user);
         assertTrue(data.isPresent());
-        assertEquals(data.get(), new UserData(user, email, screen));
+        assertEquals(new UserData(user, email, screen), data.get());
 
         assertTrue(ud.authenticateUser(user, newPass));
     }
@@ -473,12 +473,12 @@ public abstract class TestUserDirectory {
         }
 
         // test when user doesn't exist
-        assertEquals(ud.authenticateUserDetailed(username()+"thisshoudn'texist", "pass"), Authentication.INVALID_USERNAME);
+        assertEquals(Authentication.INVALID_USERNAME, ud.authenticateUserDetailed(username()+"thisshoudn'texist", "pass"));
 
         // test when password is wrong
-        assertEquals(ud.authenticateUserDetailed(user, "wrong-pass"), Authentication.INVALID_PASSWORD);
+        assertEquals(Authentication.INVALID_PASSWORD, ud.authenticateUserDetailed(user, "wrong-pass"));
 
         // test when valid
-        assertEquals(ud.authenticateUserDetailed(user, pass), Authentication.VALID);
+        assertEquals(Authentication.VALID, ud.authenticateUserDetailed(user, pass));
     }
 }
