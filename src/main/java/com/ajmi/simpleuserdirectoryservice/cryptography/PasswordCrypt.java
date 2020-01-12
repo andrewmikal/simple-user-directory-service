@@ -1,4 +1,4 @@
-package com.ajmi.simpleuserdirectoryservice.user;
+package com.ajmi.simpleuserdirectoryservice.cryptography;
 
 import org.bouncycastle.jcajce.provider.digest.SHA3;
 

@@ -1,4 +1,4 @@
-package com.ajmi.simpleuserdirectoryservice.user;
+package com.ajmi.simpleuserdirectoryservice.data;
 
 /**
  * Enum indicating what policy failed in a PolicyFailureException.

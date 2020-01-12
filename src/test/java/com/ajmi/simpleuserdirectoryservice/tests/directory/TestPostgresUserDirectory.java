@@ -1,8 +1,8 @@
-package com.ajmi.simpleuserdirectoryservice.tests;
+package com.ajmi.simpleuserdirectoryservice.tests.directory;
 
-import com.ajmi.simpleuserdirectoryservice.user.ConnectionFailureException;
-import com.ajmi.simpleuserdirectoryservice.user.PostgresUserDirectory;
-import com.ajmi.simpleuserdirectoryservice.user.UserDirectory;
+import com.ajmi.simpleuserdirectoryservice.directory.ConnectionFailureException;
+import com.ajmi.simpleuserdirectoryservice.directory.PostgresUserDirectory;
+import com.ajmi.simpleuserdirectoryservice.directory.UserDirectory;
 import org.junit.Test;
 
 import java.io.FileInputStream;

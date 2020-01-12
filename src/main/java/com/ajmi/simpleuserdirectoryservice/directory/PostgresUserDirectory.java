@@ -1,10 +1,15 @@
-package com.ajmi.simpleuserdirectoryservice.user;
+package com.ajmi.simpleuserdirectoryservice.directory;
 
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.Optional;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+
+import com.ajmi.simpleuserdirectoryservice.cryptography.PasswordCrypt;
+import com.ajmi.simpleuserdirectoryservice.data.Authentication;
+import com.ajmi.simpleuserdirectoryservice.data.UserData;
+import com.ajmi.simpleuserdirectoryservice.data.PolicyFailure;
 import javafx.util.Pair;
 
 /**

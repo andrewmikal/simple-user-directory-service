@@ -1,4 +1,4 @@
-package com.ajmi.simpleuserdirectoryservice.user;
+package com.ajmi.simpleuserdirectoryservice.directory;
 
 /**
  * Determines whether usernames, emails, screen names, and passwords are valid.

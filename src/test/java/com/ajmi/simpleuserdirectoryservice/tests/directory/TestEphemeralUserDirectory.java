@@ -1,7 +1,7 @@
-package com.ajmi.simpleuserdirectoryservice.tests;
+package com.ajmi.simpleuserdirectoryservice.tests.directory;
 
-import com.ajmi.simpleuserdirectoryservice.user.EphemeralUserDirectory;
-import com.ajmi.simpleuserdirectoryservice.user.UserDirectory;
+import com.ajmi.simpleuserdirectoryservice.directory.EphemeralUserDirectory;
+import com.ajmi.simpleuserdirectoryservice.directory.UserDirectory;
 
 /**
  * Tests for the EphemeralUserDirectory class.

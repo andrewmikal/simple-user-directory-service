@@ -1,6 +1,6 @@
-package com.ajmi.simpleuserdirectoryservice.tests;
+package com.ajmi.simpleuserdirectoryservice.tests.data;
 
-import com.ajmi.simpleuserdirectoryservice.user.UserData;
+import com.ajmi.simpleuserdirectoryservice.data.UserData;
 import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;
