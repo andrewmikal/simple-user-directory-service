@@ -71,10 +71,10 @@ public class PostgresUserDirectory implements UserDirectory {
 
     /**
      * Create a new PostgresUserDirectory with the credentials to log into the PostreSQL database.
-     * @param host URL to the Postgres instance.
-     * @param database Name of the Postgres database.
-     * @param user Username to log into Postgres.
-     * @param pass Password to log into Postgres.
+     * @param host the url to the Postgres instance.
+     * @param database the name of the Postgres database.
+     * @param user the username needed to log into the Postgres instance.
+     * @param pass the password needed to log into Postgres instance.
      */
     public PostgresUserDirectory(String host, String database, String user, String pass) throws ConnectionFailureException {
         _postgresURL = String.format("jdbc:postgresql://%s/%s", host, database);
@@ -125,7 +125,7 @@ public class PostgresUserDirectory implements UserDirectory {
     /**
      * Executes a SQL query to get the number of users in the database with the specified username, and returns true if
      * that value is equal to one.
-     * @param username User name of the user to check for.
+     * @param username the user name of the user to check for.
      * @return true if the number of users in the database with the specified username is equal to one.
      * @throws ConnectionFailureException if a SQLException occurs.
      */
@@ -154,10 +154,10 @@ public class PostgresUserDirectory implements UserDirectory {
 
     /**
      * Executes a SQL update to insert a new user into the users and passwords tables.
-     * @param username User name of the new entry.
-     * @param email Email of the new entry.
-     * @param screeName Screen name of the new entry.
-     * @param password Password of the new entry.
+     * @param username the user name of the new entry.
+     * @param email the email of the new entry.
+     * @param screeName the screen name of the new entry.
+     * @param password the password of the new entry.
      * @throws ConnectionFailureException if a SQLException occurs.
      * @throws UserAlreadyExistsException if the user directory already has a user with the specified name.
      * @throws PolicyFailureException if the username, email, screen name, or password fail the directory's policy.
@@ -234,7 +234,7 @@ public class PostgresUserDirectory implements UserDirectory {
 
     /**
      *
-     * @param username User name of the user to remove.
+     * @param username the user name of the user to remove.
      * @return true if the user exists in the directory and the user was removed from the directory, false if the
      * directory does not have the specified user.
      * @throws ConnectionFailureException if a SQLException occurs.
@@ -276,7 +276,7 @@ public class PostgresUserDirectory implements UserDirectory {
 
     /**
      * Executes a SQL query to retrieve the usernames of all users in the directory.
-     * @return A String[] containing the usernames of all users in the directory.
+     * @return a String[] containing the usernames of all users in the directory.
      * @throws ConnectionFailureException if a SQLException occurs.
      */
     @Override
@@ -304,7 +304,7 @@ public class PostgresUserDirectory implements UserDirectory {
 
     /**
      * Returns a reference to the directory's Policy field.
-     * @return reference to the directory's Policy field.
+     * @return a reference to the directory's Policy field.
      */
     @Override
     public Policy getPolicy() {
@@ -313,7 +313,7 @@ public class PostgresUserDirectory implements UserDirectory {
 
     /**
      * Sets the directory's internal policy field.
-     * @param policy Policy to set the directory's policy to.
+     * @param policy the Policy to set the directory's policy to.
      */
     @Override
     public void setPolicy(Policy policy) {
@@ -322,8 +322,8 @@ public class PostgresUserDirectory implements UserDirectory {
 
     /**
      * Checks that the given password matches the hashed password in the database when hashed with the same salt.
-     * @param username Username of user to authenticate.
-     * @param password Password used to authenticate the user.
+     * @param username the username of user to authenticate.
+     * @param password the password used to authenticate the user.
      * @return true if the hashed passwords match, false if they don't or if the user does not exist in the directory.
      * @throws ConnectionFailureException if a SQLException occurs.
      */
@@ -338,7 +338,7 @@ public class PostgresUserDirectory implements UserDirectory {
      * @param password used to authenticate the user.
      * @return INVALID_USERNAME if the user doesn't exist in the directory, INVALID_PASSWORD if the passwords don't
      * match, and VALID if the passwords do match.
-     * @throws ConnectionFailureException
+     * @throws ConnectionFailureException if a SQLException occurs.
      */
     @Override
     public Authentication authenticateUserDetailed(String username, String password) throws ConnectionFailureException {
@@ -381,7 +381,7 @@ public class PostgresUserDirectory implements UserDirectory {
 
     /**
      * Executes a SQL query to retrieve the email and screen name of the specified user.
-     * @param username Username of the user to retrieve data on.
+     * @param username the username of the user to retrieve data on.
      * @return a new UserData object from the result of the SQL query if the user exists, and null if the user does not
      * exist in the directory.
      * @throws ConnectionFailureException if a SQLException occurs.
@@ -412,8 +412,8 @@ public class PostgresUserDirectory implements UserDirectory {
 
     /**
      * Updates the specified user in the database with a new username.
-     * @param username Username of the user to update.
-     * @param newUsername Username to change the user's current username to.
+     * @param username the username of the user to update.
+     * @param newUsername the username to change the user's current username to.
      * @throws ConnectionFailureException if a SQLException occurs.
      */
     @Override
@@ -423,8 +423,8 @@ public class PostgresUserDirectory implements UserDirectory {
 
     /**
      * Updates the specified user in the database with a new email.
-     * @param username Username of the user to update.
-     * @param newEmail Email to change the user's current email to.
+     * @param username the username of the user to update.
+     * @param newEmail the email to change the user's current email to.
      * @throws ConnectionFailureException if a SQLException occurs.
      */
     @Override
@@ -434,8 +434,8 @@ public class PostgresUserDirectory implements UserDirectory {
 
     /**
      * Updates the specified user in the database with a new screen name.
-     * @param username Username of the user to update.
-     * @param newScreenName Screen name to change the user's current screen name to.
+     * @param username the username of the user to update.
+     * @param newScreenName the screen name to change the user's current screen name to.
      * @throws ConnectionFailureException if a SQLException occurs.
      */
     @Override
@@ -445,8 +445,8 @@ public class PostgresUserDirectory implements UserDirectory {
 
     /**
      * Updates the specified user in the database with a new password.
-     * @param username Username of the user to update.
-     * @param newPassword Password to change the user's current password to.
+     * @param username the username of the user to update.
+     * @param newPassword the password to change the user's current password to.
      * @throws ConnectionFailureException if a SQLException occurs.
      */
     @Override
@@ -470,7 +470,7 @@ public class PostgresUserDirectory implements UserDirectory {
 
     /**
      * Creates a new connection to the directory's database.
-     * @return Returns a new SQL Connection object to the directory's database.
+     * @return a new SQL Connection object to the directory's database.
      * @throws SQLException Thrown when their is a problem connecting to the database.
      */
     private Connection connect() throws SQLException {
@@ -516,7 +516,7 @@ public class PostgresUserDirectory implements UserDirectory {
 
     /**
      * Checks if a table with the specified name exists in the database.
-     * @param tableName name of the table to check for.
+     * @param tableName the name of the table to check for.
      * @return true if the table exists, false otherwise
      * @throws ConnectionFailureException if a SQLException occurs.
      */
@@ -537,9 +537,9 @@ public class PostgresUserDirectory implements UserDirectory {
 
     /**
      * Executes the given SQL statement to update a value for the specified user.
-     * @param username Username of the user to update.
-     * @param newValue New value to set the value to.
-     * @param sql SQL statement to execute.
+     * @param username the username of the user to update.
+     * @param newValue the new value to set the current value to.
+     * @param sql the SQL statement to execute.
      * @throws ConnectionFailureException if a SQLException occurs.
      */
     private void updateValue(String username, String newValue, String sql) throws ConnectionFailureException {
@@ -560,7 +560,7 @@ public class PostgresUserDirectory implements UserDirectory {
 
     /**
      * Executes a SQL query to fetch the id and salt for a specified user.
-     * @param username Username of the user to fetch the id and salt for.
+     * @param username the username of the user to fetch the id and salt for.
      * @return the user's id and salt if the user exists in the directory, null otherwise.
      * @throws ConnectionFailureException if s SQLException occurs.
      */
