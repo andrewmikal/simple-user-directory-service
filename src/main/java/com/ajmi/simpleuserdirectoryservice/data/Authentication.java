@@ -1,4 +1,4 @@
-package com.ajmi.simpleuserdirectoryservice.user;
+package com.ajmi.simpleuserdirectoryservice.data;
 
 /**
  * Contains possible results from trying to authenticate a user.

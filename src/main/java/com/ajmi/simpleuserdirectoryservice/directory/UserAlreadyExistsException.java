@@ -1,15 +1,15 @@
-package com.ajmi.simpleuserdirectoryservice.user;
+package com.ajmi.simpleuserdirectoryservice.directory;
 
 /**
- * Exception thrown when a connection-related error occurs when using a User Directory.
+ * Exception thrown when a user in the UserDirectory already exists.
  */
-public class ConnectionFailureException extends UserDirectoryException{
+public class UserAlreadyExistsException extends UserDirectoryException {
 
     /**
      * Constructs a new exception with the specified detail message.
      * @param message the detail message.
      */
-    public ConnectionFailureException(String message) {
+    public UserAlreadyExistsException(String message) {
         super(message);
     }
 
@@ -18,7 +18,7 @@ public class ConnectionFailureException extends UserDirectoryException{
      * @param message the detail message.
      * @param cause the cause.
      */
-    public ConnectionFailureException(String message, Throwable cause) {
+    public UserAlreadyExistsException(String message, Throwable cause) {
         super(message, cause);
     }
 }

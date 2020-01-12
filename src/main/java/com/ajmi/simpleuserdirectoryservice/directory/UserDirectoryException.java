@@ -1,15 +1,15 @@
-package com.ajmi.simpleuserdirectoryservice.user;
+package com.ajmi.simpleuserdirectoryservice.directory;
 
 /**
- * Exception thrown when a user in the UserDirectory already exists.
+ * Exception that can be thrown by UserDirectory.
  */
-public class UserAlreadyExistsException extends UserDirectoryException {
+public abstract class UserDirectoryException extends Exception {
 
     /**
      * Constructs a new exception with the specified detail message.
      * @param message the detail message.
      */
-    public UserAlreadyExistsException(String message) {
+    public UserDirectoryException(String message) {
         super(message);
     }
 
@@ -18,7 +18,7 @@ public class UserAlreadyExistsException extends UserDirectoryException {
      * @param message the detail message.
      * @param cause the cause.
      */
-    public UserAlreadyExistsException(String message, Throwable cause) {
+    public UserDirectoryException(String message, Throwable cause) {
         super(message, cause);
     }
 }

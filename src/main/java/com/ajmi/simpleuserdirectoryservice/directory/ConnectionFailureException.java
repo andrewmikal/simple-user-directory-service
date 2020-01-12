@@ -1,15 +1,15 @@
-package com.ajmi.simpleuserdirectoryservice.user;
+package com.ajmi.simpleuserdirectoryservice.directory;
 
 /**
- * Exception that can be thrown by UserDirectory.
+ * Exception thrown when a connection-related error occurs when using a User Directory.
  */
-public abstract class UserDirectoryException extends Exception {
+public class ConnectionFailureException extends UserDirectoryException{
 
     /**
      * Constructs a new exception with the specified detail message.
      * @param message the detail message.
      */
-    public UserDirectoryException(String message) {
+    public ConnectionFailureException(String message) {
         super(message);
     }
 
@@ -18,7 +18,7 @@ public abstract class UserDirectoryException extends Exception {
      * @param message the detail message.
      * @param cause the cause.
      */
-    public UserDirectoryException(String message, Throwable cause) {
+    public ConnectionFailureException(String message, Throwable cause) {
         super(message, cause);
     }
 }

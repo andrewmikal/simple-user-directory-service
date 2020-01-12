@@ -1,17 +1,15 @@
-package com.ajmi.simpleuserdirectoryservice.tests;
+package com.ajmi.simpleuserdirectoryservice.tests.directory;
 
-import com.ajmi.simpleuserdirectoryservice.user.*;
+import com.ajmi.simpleuserdirectoryservice.data.Authentication;
+import com.ajmi.simpleuserdirectoryservice.data.UserData;
+import com.ajmi.simpleuserdirectoryservice.directory.Policy;
+import com.ajmi.simpleuserdirectoryservice.data.PolicyFailure;
+import com.ajmi.simpleuserdirectoryservice.directory.PolicyFailureException;
+import com.ajmi.simpleuserdirectoryservice.directory.*;
 import org.junit.Test;
 
-import java.lang.reflect.Array;
-import java.time.Clock;
-import java.time.Instant;
-import java.time.ZoneId;
-import java.time.format.DateTimeFormatter;
-import java.time.format.FormatStyle;
 import java.util.Arrays;
 import java.util.HashSet;
-import java.util.Locale;
 import java.util.Optional;
 
 import static junit.framework.TestCase.*;

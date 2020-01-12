@@ -1,10 +1,12 @@
-package com.ajmi.simpleuserdirectoryservice.user;
+package com.ajmi.simpleuserdirectoryservice.directory;
+
+import com.ajmi.simpleuserdirectoryservice.data.PolicyFailure;
 
 /**
  * Exception thrown when the username, email, screen name, or password used to add a user to a UserDirectory does not
  * meet the corresponding policy.
  */
-public class PolicyFailureException extends UserDirectoryException{
+public class PolicyFailureException extends UserDirectoryException {
     private PolicyFailure _failure;
 
     /**
