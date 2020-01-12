@@ -6,8 +6,10 @@ import com.ajmi.simpleuserdirectoryservice.directory.Policy;
 import com.ajmi.simpleuserdirectoryservice.data.PolicyFailure;
 import com.ajmi.simpleuserdirectoryservice.directory.PolicyFailureException;
 import com.ajmi.simpleuserdirectoryservice.directory.*;
+import org.junit.After;
 import org.junit.Test;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Optional;
@@ -36,6 +38,20 @@ public abstract class TestUserDirectory {
      */
     protected abstract UserDirectory create();
 
+    private ArrayList<String> usersToRemove = new ArrayList<>();
+
+    @After
+    public void tearDown() {
+        UserDirectory ud = create();
+        for (String name : usersToRemove) {
+            try {
+                ud.removeUser(name);
+            } catch (ConnectionFailureException e) {
+                // ignore exception
+            }
+        }
+    }
+
     /**
      * Tests the hasUser() method when the user does not exist in the directory.
      */
@@ -58,6 +74,7 @@ public abstract class TestUserDirectory {
         assertFalse(ud.hasUser(uname));
         try {
             ud.addUser(uname, "foo", "bar", "baz");
+            removeUserLater(uname);
         } catch (UserDirectoryException e) {
             // unexpected exception
             fail();
@@ -77,6 +94,7 @@ public abstract class TestUserDirectory {
         assertFalse(ud.hasUser(uname));
         try {
             ud.addUser(uname, "foo", "bar", "baz");
+            removeUserLater(uname);
         } catch (UserDirectoryException e) {
             // unexpected exception
             fail();
@@ -84,6 +102,7 @@ public abstract class TestUserDirectory {
         assertTrue(ud.hasUser(uname));
         try {
             ud.addUser(uname, "foo", "bar", "baz");
+            removeUserLater(uname);
             // exception was not caught
             fail();
         } catch (UserAlreadyExistsException e) {
@@ -112,6 +131,7 @@ public abstract class TestUserDirectory {
         String uname = username();
         try {
             ud.addUser(uname, "foo", "bar", "baz");
+            removeUserLater(uname);
         } catch (UserDirectoryException e) {
             // unexpected exception
             fail();
@@ -133,6 +153,7 @@ public abstract class TestUserDirectory {
         for (String name : usernames) {
             try {
                 ud.addUser(name, "foo", "bar", "baz");
+                removeUserLater(name);
             } catch (UserDirectoryException e) {
                 // unexpected exception
                 fail();
@@ -178,6 +199,7 @@ public abstract class TestUserDirectory {
         String pass = "password"+username();
         try {
             ud.addUser(user, "foo", "bar", pass);
+            removeUserLater(user);
         } catch (UserAlreadyExistsException | PolicyFailureException e) {
             // unexpected exception
             fail();
@@ -208,6 +230,7 @@ public abstract class TestUserDirectory {
 
         try {
             ud.addUser(user, email, screen, "baz");
+            removeUserLater(user);
         } catch (UserAlreadyExistsException | PolicyFailureException e) {
             // unexpected exception
             fail();
@@ -233,6 +256,7 @@ public abstract class TestUserDirectory {
 
         try {
             ud.addUser(user, email, screen, pass);
+            removeUserLater(user);
         } catch (UserAlreadyExistsException | PolicyFailureException e) {
             // unexpected exception
             fail();
@@ -240,6 +264,7 @@ public abstract class TestUserDirectory {
         assertTrue(ud.hasUser(user));
 
         ud.updateUsername(user, newUser);
+        removeUserLater(newUser);
         assertFalse(ud.hasUser(user));
         assertTrue(ud.hasUser(newUser));
 
@@ -274,6 +299,7 @@ public abstract class TestUserDirectory {
 
         try {
             ud.addUser(user, email, screen, pass);
+            removeUserLater(user);
         } catch (UserAlreadyExistsException | PolicyFailureException e) {
             // unexpected exception
             fail();
@@ -311,6 +337,7 @@ public abstract class TestUserDirectory {
 
         try {
             ud.addUser(user, email, screen, pass);
+            removeUserLater(user);
         } catch (UserAlreadyExistsException | PolicyFailureException e) {
             // unexpected exception
             fail();
@@ -348,6 +375,7 @@ public abstract class TestUserDirectory {
 
         try {
             ud.addUser(user, email, screen, pass);
+            removeUserLater(user);
         } catch (UserAlreadyExistsException | PolicyFailureException e) {
             // unexpected exception
             fail();
@@ -407,6 +435,7 @@ public abstract class TestUserDirectory {
         // test that valid user passes policy
         try {
             ud.addUser(goodUser, good, good, good);
+            removeUserLater(goodUser);
         } catch (PolicyFailureException e) {
             // unexpected exception
             fail();
@@ -418,6 +447,7 @@ public abstract class TestUserDirectory {
         // test that invalid username fails policy
         try {
             ud.addUser(badUser, good, good, good);
+            removeUserLater(badUser);
             // exception expected
             fail();
         } catch (PolicyFailureException e) {
@@ -427,6 +457,7 @@ public abstract class TestUserDirectory {
         // test that invalid email fails policy
         try {
             ud.addUser(goodUser, bad, good, good);
+            removeUserLater(goodUser);
             // exception expected
             fail();
         } catch (PolicyFailureException e) {
@@ -436,6 +467,7 @@ public abstract class TestUserDirectory {
         // test that invalid screen name fails policy
         try {
             ud.addUser(goodUser, good, bad, good);
+            removeUserLater(goodUser);
             // exception expected
             fail();
         } catch (PolicyFailureException e) {
@@ -445,6 +477,7 @@ public abstract class TestUserDirectory {
         // test that invalid screen name fails policy
         try {
             ud.addUser(goodUser, good, good, bad);
+            removeUserLater(goodUser);
             // exception expected
             fail();
         } catch (PolicyFailureException e) {
@@ -465,6 +498,7 @@ public abstract class TestUserDirectory {
         String pass = "pass";
         try {
             ud.addUser(user, "foo", "bar", pass);
+            removeUserLater(user);
         } catch (UserAlreadyExistsException | PolicyFailureException e) {
             // unexpected exception
             fail();
@@ -478,5 +512,9 @@ public abstract class TestUserDirectory {
 
         // test when valid
         assertEquals(Authentication.VALID, ud.authenticateUserDetailed(user, pass));
+    }
+
+    private void removeUserLater(String username) {
+        usersToRemove.add(username);
     }
 }
