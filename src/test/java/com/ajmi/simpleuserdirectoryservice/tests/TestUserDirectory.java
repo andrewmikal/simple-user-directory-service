@@ -217,7 +217,7 @@ public abstract class TestUserDirectory {
 
         Optional<UserData> data = ud.getUserData(user);
         assertTrue(data.isPresent());
-        assertEquals(data.get(), new UserData(user, email, screen));
+        assertEquals(new UserData(user, email, screen), data.get());
     }
 
     /**
