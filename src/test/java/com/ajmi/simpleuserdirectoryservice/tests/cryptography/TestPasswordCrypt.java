@@ -90,7 +90,7 @@ public class TestPasswordCrypt {
         try {
             PasswordCrypt.hashPassword(pass, salt);
             // if the program doesn't crash, then the test failed.
-            fail();
+            fail("Failed to throw an IllegalArgumentException");
         } catch (IllegalArgumentException e) {
             // expected
         }
@@ -107,7 +107,7 @@ public class TestPasswordCrypt {
         try {
             PasswordCrypt.hashPassword(pass, salt);
             // if the program doesn't crash, then the test failed.
-            fail();
+            fail("Failed to throw an IllegalArgumentException");
         } catch (IllegalArgumentException e) {
             // expected
         }
@@ -124,7 +124,7 @@ public class TestPasswordCrypt {
         try {
             PasswordCrypt.hashPassword(pass, salt);
             // if the program doesn't crash, then the test failed.
-            fail();
+            fail("Failed to throw an IllegalArgumentException");
         } catch (IllegalArgumentException e) {
             // expected
         }
@@ -141,7 +141,7 @@ public class TestPasswordCrypt {
         try {
             PasswordCrypt.hashPassword(pass, salt);
             // if the program doesn't crash, then the test failed.
-            fail();
+            fail("Failed to throw an IllegalArgumentException");
         } catch (IllegalArgumentException e) {
             // expected
         }
