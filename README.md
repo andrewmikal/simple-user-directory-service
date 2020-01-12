@@ -11,3 +11,7 @@ suds.pg.database=database-name
 suds.pg.user=postgres-user-name
 suds.pg.pass=postgres-password
 ```
+This file should not by checked in to git, and is in the `.gitignore`.
+
+### How to Build ###
+This project is built using Maven by typing the command `mvn install`.
