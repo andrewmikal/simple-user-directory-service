@@ -86,15 +86,14 @@ public abstract class TestUserDirectory {
         assertTrue(ud.hasUser(uname));
         try {
             ud.addUser(uname, "foo", "bar", "baz");
+            // exception was not caught
+            fail();
         } catch (UserAlreadyExistsException e) {
             // expected exception
             assertTrue(true);
-            return;
         } catch (UserDirectoryException e) {
             // unexpected exception
         }
-        // exception was not caught
-        fail();
     }
 
     /**
@@ -407,8 +406,6 @@ public abstract class TestUserDirectory {
             }
         });
 
-        boolean pass = false;
-
         // test that valid user passes policy
         try {
             ud.addUser(goodUser, good, good, good);
@@ -423,38 +420,39 @@ public abstract class TestUserDirectory {
         // test that invalid username fails policy
         try {
             ud.addUser(badUser, good, good, good);
+            // exception expected
+            fail();
         } catch (PolicyFailureException e) {
             assertFalse(ud.hasUser(badUser));
             assertEquals(PolicyFailure.ILLEGAL_USERNAME, e.getFailure());
-
-            // test that invalid email fails policy
-            try {
-                ud.addUser(goodUser, bad, good, good);
-            } catch (PolicyFailureException e1) {
-                assertFalse(ud.hasUser(goodUser));
-                assertEquals(PolicyFailure.ILLEGAL_EMAIL, e.getFailure());
-
-                // test that invalid screen name fails policy
-                try {
-                    ud.addUser(goodUser, good, bad, good);
-                } catch (PolicyFailureException e2) {
-                    assertFalse(ud.hasUser(goodUser));
-                    assertEquals(PolicyFailure.ILLEGAL_SCREEN_NAME, e.getFailure());
-
-                    // test that invalid screen name fails policy
-                    try {
-                        ud.addUser(goodUser, good, good, bad);
-                    } catch (PolicyFailureException e3) {
-                        assertFalse(ud.hasUser(good));
-                        assertEquals(PolicyFailure.ILLEGAL_PASSWORD, e.getFailure());
-
-                        // test passed
-                        pass = true;
-                    }
-                }
-            }
         }
-        assertTrue(pass);
+        // test that invalid email fails policy
+        try {
+            ud.addUser(goodUser, bad, good, good);
+            // exception expected
+            fail();
+        } catch (PolicyFailureException e) {
+            assertFalse(ud.hasUser(goodUser));
+            assertEquals(PolicyFailure.ILLEGAL_EMAIL, e.getFailure());
+        }
+        // test that invalid screen name fails policy
+        try {
+            ud.addUser(goodUser, good, bad, good);
+            // exception expected
+            fail();
+        } catch (PolicyFailureException e) {
+            assertFalse(ud.hasUser(goodUser));
+            assertEquals(PolicyFailure.ILLEGAL_SCREEN_NAME, e.getFailure());
+        }
+        // test that invalid screen name fails policy
+        try {
+            ud.addUser(goodUser, good, good, bad);
+            // exception expected
+            fail();
+        } catch (PolicyFailureException e) {
+            assertFalse(ud.hasUser(good));
+            assertEquals(PolicyFailure.ILLEGAL_PASSWORD, e.getFailure());
+        }
     }
 
     /**
