@@ -55,8 +55,8 @@ public class EphemeralUserDirectory implements UserDirectory {
 
     /**
      * Checks that the users hash map contains the provided username as a key.
-     * @param username User name of the user to check for.
-     * @return Returns true if the provided username is a key in the hash map, false otherwise.
+     * @param username the user name of the user to check for.
+     * @return true if the provided username is a key in the hash map, false otherwise.
      */
     @Override
     public boolean hasUser(String username) {
@@ -65,12 +65,12 @@ public class EphemeralUserDirectory implements UserDirectory {
 
     /**
      * Adds the username, email, and screen name to the users hash map, and the password to the passwords hash map.
-     * @param username User name of the new entry.
-     * @param email Email of the new entry.
-     * @param screeName Screen name of the new entry.
-     * @param password Password of the new entry.
-     * @throws UserAlreadyExistsException Thrown if the hasUser() method returns true for the provided username.
-     * @throws PolicyFailureException Thrown if the parameters do not pass every check by the directory's policy.
+     * @param username the user name of the new entry.
+     * @param email the email of the new entry.
+     * @param screeName the screen name of the new entry.
+     * @param password the password of the new entry.
+     * @throws UserAlreadyExistsException if the hasUser() method returns true for the provided username.
+     * @throws PolicyFailureException if the parameters do not pass every check by the directory's policy.
      */
     @Override
     public void addUser(String username, String email, String screeName, String password) throws UserAlreadyExistsException, PolicyFailureException {
@@ -101,8 +101,8 @@ public class EphemeralUserDirectory implements UserDirectory {
 
     /**
      * Removes the entries with the specified username as the key from the users and passwords hash maps.
-     * @param username User name of the user to remove.
-     * @return Returns true if hasUser() returns true, false otherwise.
+     * @param username the user name of the user to remove.
+     * @return true if hasUser() returns true, false otherwise.
      */
     @Override
     public boolean removeUser(String username) {
@@ -117,7 +117,7 @@ public class EphemeralUserDirectory implements UserDirectory {
 
     /**
      * Retrieves an array of all the keys of the users hash map.
-     * @return Returns the key set of the users hash map cast to an array of strings.
+     * @return the key set of the users hash map cast to an array of strings.
      */
     @Override
     public String[] getUsers() {
@@ -128,7 +128,7 @@ public class EphemeralUserDirectory implements UserDirectory {
 
     /**
      * Retrieves the directory's policy.
-     * @return Retrieves the directory's policy.
+     * @return the directory's policy.
      */
     @Override
     public Policy getPolicy() {
@@ -137,7 +137,7 @@ public class EphemeralUserDirectory implements UserDirectory {
 
     /**
      * Sets the directory's internal policy field.
-     * @param policy Policy to set the directory's policy to.
+     * @param policy the Policy to set the directory's policy to.
      */
     @Override
     public void setPolicy(Policy policy) {
@@ -146,8 +146,8 @@ public class EphemeralUserDirectory implements UserDirectory {
 
     /**
      * Checks that the provided password matches the password in the passwords hash map.
-     * @param username Username of user to authenticate.
-     * @param password Password used to authenticate the user.
+     * @param username the username of user to authenticate.
+     * @param password the password used to authenticate the user.
      * @return Returns true if the passwords match, false otherwise.
      */
     @Override
@@ -157,8 +157,8 @@ public class EphemeralUserDirectory implements UserDirectory {
 
     /**
      * Checks that the provided password matches the password in the passwords hash map.
-     * @param username of user to authenticate.
-     * @param password used to authenticate the user.
+     * @param username the username of user to authenticate.
+     * @param password the password used to authenticate the user.
      * @return INVALID_USERNAME if the directory doesn't have the specified user, INVALID_PASSWORD if the given password
      * and the password in the passwords hash map don't match, and VALID if they do.
      */
@@ -179,8 +179,8 @@ public class EphemeralUserDirectory implements UserDirectory {
 
     /**
      * Retrieves a UserData object from the users hash map containing information on the specified user.
-     * @param username Username of the user to retrieve data on.
-     * @return A UserData object containing the data if the user exists, and null if the user does not exist.
+     * @param username the username of the user to retrieve data on.
+     * @return a UserData object containing the data if the user exists, and null if the user does not exist.
      */
     @Override
     public Optional<UserData> getUserData(String username) {
@@ -195,8 +195,8 @@ public class EphemeralUserDirectory implements UserDirectory {
      * key from the users and passwords hash maps, then adds a new entry to each of the hash maps with the new username
      * as the key, using the old password, and creating a new UserData object with the new username and the old email
      * and screen name.
-     * @param username Username of the user to update.
-     * @param newUsername Username to change the user's current username to.
+     * @param username the username of the user to update.
+     * @param newUsername the username to change the user's current username to.
      */
     @Override
     public void updateUsername(String username, String newUsername) {
@@ -216,8 +216,8 @@ public class EphemeralUserDirectory implements UserDirectory {
     /**
      * If the specified user exists, put the specified username back into the users hash map with a new UserData object
      * containing the old username, new email, and old screen name.
-     * @param username Username of the user to update.
-     * @param newEmail Email to change the user's current email to.
+     * @param username the username of the user to update.
+     * @param newEmail the email to change the user's current email to.
      */
     @Override
     public void updateEmail(String username, String newEmail) {
@@ -230,8 +230,8 @@ public class EphemeralUserDirectory implements UserDirectory {
     /**
      * If the specified user exists, put the specified username back into the users hash map with a new UserData object
      * containing the old username, odl email, and new screen name.
-     * @param username Username of the user to update.
-     * @param newScreenName Screen name to change the user's current screen name to.
+     * @param username the username of the user to update.
+     * @param newScreenName the screen name to change the user's current screen name to.
      */
     @Override
     public void updateScreenName(String username, String newScreenName) {
@@ -243,8 +243,8 @@ public class EphemeralUserDirectory implements UserDirectory {
 
     /**
      * If the specified user exists, put the specified username back into the passwords hash map with the new password.
-     * @param username Username of the user to update.
-     * @param newPassword Password to change the user's current password to.
+     * @param username the username of the user to update.
+     * @param newPassword the password to change the user's current password to.
      */
     @Override
     public void updatePassword(String username, String newPassword) {

@@ -24,7 +24,7 @@ public class PasswordCrypt {
 
     /**
      * Generates a secure, random hex string to use as a salt.
-     * @return Returns a String of a hex number.
+     * @return a String of a hex number.
      */
     public static String nextSalt() {
         byte[] saltBytes = new byte[SALT_LENGTH];
@@ -34,9 +34,9 @@ public class PasswordCrypt {
 
     /**
      * Hashes the specified password using the specified salt.
-     * @param password Password to hash.
-     * @param salt Salt to use to hash the password.
-     * @return Returns the hashed password as a new String.
+     * @param password the password to hash.
+     * @param salt the salt to use when hashing the password.
+     * @return the hashed password as a new String.
      */
     public static String hashPassword(String password, String salt) {
         // check arguments
@@ -70,8 +70,8 @@ public class PasswordCrypt {
 
     /**
      * Concatenates any number of byte arrays.
-     * @param args Byte arrays to concatenate.
-     * @return Returns a new byte containing the concatenated arguments.
+     * @param args the Byte arrays to concatenate.
+     * @return a new byte containing the concatenated arguments.
      */
     private static byte[] concat(byte[]... args) {
         int len = 0;
