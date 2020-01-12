@@ -1,4 +1,4 @@
-package com.ajmi.simpleuserdirectoryservice.user;
+package com.ajmi.simpleuserdirectoryservice.data;
 
 /**
  * Object containing retrievable data about a user.
@@ -14,9 +14,9 @@ public class UserData {
 
     /**
      * Create a new UserDirectory object from the provided information.
-     * @param username Username of the user.
-     * @param email Email of the user.
-     * @param screenName Screen name of the user.
+     * @param username the username of the user.
+     * @param email the email of the user.
+     * @param screenName the screen name of the user.
      */
     public UserData(String username, String email, String screenName) {
         _username = username;
@@ -26,7 +26,7 @@ public class UserData {
 
     /**
      * Get the username of the user.
-     * @return Return the user's username.
+     * @return the user's username.
      */
     public String getUsername() {
         return _username;
@@ -34,7 +34,7 @@ public class UserData {
 
     /**
      * Get the email of the user.
-     * @return Return the user's email.
+     * @return the user's email.
      */
     public String getEmail() {
         return _email;
@@ -42,7 +42,7 @@ public class UserData {
 
     /**
      * Get the screen name of the user.
-     * @return Return the user's screen name.
+     * @return the user's screen name.
      */
     public String getScreenName() {
         return _screenName;
@@ -50,8 +50,8 @@ public class UserData {
 
     /**
      * Checks if this UserData object has the same user information as another object.
-     * @param obj Object to check for the same user information.
-     * @return Returns true if both objects have the same user information, false if not, or if one isn't a UserData.
+     * @param obj the Object to check for the same user information.
+     * @return true if both objects have the same user information, false if not, or if one isn't a UserData.
      */
     @Override
     public boolean equals(Object obj) {

@@ -1,17 +1,18 @@
-package com.ajmi.simpleuserdirectoryservice.tests;
+package com.ajmi.simpleuserdirectoryservice.tests.directory;
 
-import com.ajmi.simpleuserdirectoryservice.user.*;
+import com.ajmi.simpleuserdirectoryservice.data.Authentication;
+import com.ajmi.simpleuserdirectoryservice.data.UserData;
+import com.ajmi.simpleuserdirectoryservice.directory.Policy;
+import com.ajmi.simpleuserdirectoryservice.data.PolicyFailure;
+import com.ajmi.simpleuserdirectoryservice.directory.PolicyFailureException;
+import com.ajmi.simpleuserdirectoryservice.directory.*;
+import org.junit.After;
 import org.junit.Test;
 
-import java.lang.reflect.Array;
-import java.time.Clock;
-import java.time.Instant;
-import java.time.ZoneId;
-import java.time.format.DateTimeFormatter;
-import java.time.format.FormatStyle;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
-import java.util.Locale;
+import java.util.Optional;
 
 import static junit.framework.TestCase.*;
 
@@ -37,6 +38,20 @@ public abstract class TestUserDirectory {
      */
     protected abstract UserDirectory create();
 
+    private ArrayList<String> usersToRemove = new ArrayList<>();
+
+    @After
+    public void tearDown() {
+        UserDirectory ud = create();
+        for (String name : usersToRemove) {
+            try {
+                ud.removeUser(name);
+            } catch (ConnectionFailureException e) {
+                // ignore exception
+            }
+        }
+    }
+
     /**
      * Tests the hasUser() method when the user does not exist in the directory.
      */
@@ -59,9 +74,10 @@ public abstract class TestUserDirectory {
         assertFalse(ud.hasUser(uname));
         try {
             ud.addUser(uname, "foo", "bar", "baz");
+            removeUserLater(uname);
         } catch (UserDirectoryException e) {
             // unexpected exception
-            fail();
+            fail("Unexpected UserDirectoryException");
         }
         assertTrue(ud.hasUser(uname));
     }
@@ -78,22 +94,23 @@ public abstract class TestUserDirectory {
         assertFalse(ud.hasUser(uname));
         try {
             ud.addUser(uname, "foo", "bar", "baz");
+            removeUserLater(uname);
         } catch (UserDirectoryException e) {
             // unexpected exception
-            fail();
+            fail("Unexpected UserDirectory Exception");
         }
         assertTrue(ud.hasUser(uname));
         try {
             ud.addUser(uname, "foo", "bar", "baz");
+            removeUserLater(uname);
+            // exception was not caught
+            fail("Failed to throw a UserAlreadyExistsException");
         } catch (UserAlreadyExistsException e) {
             // expected exception
             assertTrue(true);
-            return;
         } catch (UserDirectoryException e) {
             // unexpected exception
         }
-        // exception was not caught
-        fail();
     }
 
     /**
@@ -114,9 +131,10 @@ public abstract class TestUserDirectory {
         String uname = username();
         try {
             ud.addUser(uname, "foo", "bar", "baz");
+            removeUserLater(uname);
         } catch (UserDirectoryException e) {
             // unexpected exception
-            fail();
+            fail("Unexpected UserDirectoryException");
         }
 
         assertTrue(ud.hasUser(uname));
@@ -135,9 +153,10 @@ public abstract class TestUserDirectory {
         for (String name : usernames) {
             try {
                 ud.addUser(name, "foo", "bar", "baz");
+                removeUserLater(name);
             } catch (UserDirectoryException e) {
                 // unexpected exception
-                fail();
+                fail("Unexpected UserDirectoryException");
             }
         }
         String[] users = ud.getUsers();
@@ -180,9 +199,10 @@ public abstract class TestUserDirectory {
         String pass = "password"+username();
         try {
             ud.addUser(user, "foo", "bar", pass);
+            removeUserLater(user);
         } catch (UserAlreadyExistsException | PolicyFailureException e) {
             // unexpected exception
-            fail();
+            fail("Unexpected Exception");
         }
 
         // test method when valid
@@ -210,12 +230,15 @@ public abstract class TestUserDirectory {
 
         try {
             ud.addUser(user, email, screen, "baz");
+            removeUserLater(user);
         } catch (UserAlreadyExistsException | PolicyFailureException e) {
             // unexpected exception
-            fail();
+            fail("Unexpected Exception");
         }
 
-        assertEquals(ud.getUserData(user), new UserData(user, email, screen));
+        Optional<UserData> data = ud.getUserData(user);
+        assertTrue(data.isPresent());
+        assertEquals(new UserData(user, email, screen), data.get());
     }
 
     /**
@@ -233,17 +256,22 @@ public abstract class TestUserDirectory {
 
         try {
             ud.addUser(user, email, screen, pass);
+            removeUserLater(user);
         } catch (UserAlreadyExistsException | PolicyFailureException e) {
             // unexpected exception
-            fail();
+            fail("Unexpected Exception");
         }
         assertTrue(ud.hasUser(user));
 
         ud.updateUsername(user, newUser);
+        removeUserLater(newUser);
         assertFalse(ud.hasUser(user));
         assertTrue(ud.hasUser(newUser));
 
-        assertEquals(ud.getUserData(newUser), new UserData(newUser, email, screen));
+        Optional<UserData> data = ud.getUserData(newUser);
+        assertTrue(data.isPresent());
+        assertEquals(new UserData(newUser, email, screen), data.get());
+
         assertTrue(ud.authenticateUser(newUser, pass));
     }
 
@@ -271,13 +299,17 @@ public abstract class TestUserDirectory {
 
         try {
             ud.addUser(user, email, screen, pass);
+            removeUserLater(user);
         } catch (UserAlreadyExistsException | PolicyFailureException e) {
             // unexpected exception
-            fail();
+            fail("Unexpected Exception");
         }
         ud.updateEmail(user, newEmail);
 
-        assertEquals(ud.getUserData(user), new UserData(user, newEmail, screen));
+        Optional<UserData> data = ud.getUserData(user);
+        assertTrue(data.isPresent());
+        assertEquals(new UserData(user, newEmail, screen), data.get());
+
         assertTrue(ud.authenticateUser(user, pass));
     }
 
@@ -305,13 +337,17 @@ public abstract class TestUserDirectory {
 
         try {
             ud.addUser(user, email, screen, pass);
+            removeUserLater(user);
         } catch (UserAlreadyExistsException | PolicyFailureException e) {
             // unexpected exception
-            fail();
+            fail("Unexpected Exception");
         }
         ud.updateScreenName(user, newScreen);
 
-        assertEquals(ud.getUserData(user), new UserData(user, email, newScreen));
+        Optional<UserData> data = ud.getUserData(user);
+        assertTrue(data.isPresent());
+        assertEquals(new UserData(user, email, newScreen), data.get());
+
         assertTrue(ud.authenticateUser(user, pass));
     }
 
@@ -339,13 +375,17 @@ public abstract class TestUserDirectory {
 
         try {
             ud.addUser(user, email, screen, pass);
+            removeUserLater(user);
         } catch (UserAlreadyExistsException | PolicyFailureException e) {
             // unexpected exception
-            fail();
+            fail("Unexpected Exception");
         }
         ud.updatePassword(user, newPass);
 
-        assertEquals(ud.getUserData(user), new UserData(user, email, screen));
+        Optional<UserData> data = ud.getUserData(user);
+        assertTrue(data.isPresent());
+        assertEquals(new UserData(user, email, screen), data.get());
+
         assertTrue(ud.authenticateUser(user, newPass));
     }
 
@@ -392,14 +432,13 @@ public abstract class TestUserDirectory {
             }
         });
 
-        boolean pass = false;
-
         // test that valid user passes policy
         try {
             ud.addUser(goodUser, good, good, good);
+            removeUserLater(goodUser);
         } catch (PolicyFailureException e) {
             // unexpected exception
-            fail();
+            fail("Unexpected PolicyFailureException");
         }
         assertTrue(ud.hasUser(goodUser));
         ud.removeUser(goodUser);
@@ -408,33 +447,74 @@ public abstract class TestUserDirectory {
         // test that invalid username fails policy
         try {
             ud.addUser(badUser, good, good, good);
+            removeUserLater(badUser);
+            // exception expected
+            fail("Failed to throw a PolicyFailureException");
         } catch (PolicyFailureException e) {
             assertFalse(ud.hasUser(badUser));
-
-            // test that invalid email fails policy
-            try {
-                ud.addUser(goodUser, bad, good, good);
-            } catch (PolicyFailureException e1) {
-                assertFalse(ud.hasUser(goodUser));
-
-                // test that invalid screen name fails policy
-                try {
-                    ud.addUser(goodUser, good, bad, good);
-                } catch (PolicyFailureException e2) {
-                    assertFalse(ud.hasUser(goodUser));
-
-                    // test that invalid screen name fails policy
-                    try {
-                        ud.addUser(goodUser, good, good, bad);
-                    } catch (PolicyFailureException e3) {
-                        assertFalse(ud.hasUser(good));
-
-                        // test passed
-                        pass = true;
-                    }
-                }
-            }
+            assertEquals(PolicyFailure.ILLEGAL_USERNAME, e.getFailure());
         }
-        assertTrue(pass);
+        // test that invalid email fails policy
+        try {
+            ud.addUser(goodUser, bad, good, good);
+            removeUserLater(goodUser);
+            // exception expected
+            fail("Failed to throw a PolicyFailureException");
+        } catch (PolicyFailureException e) {
+            assertFalse(ud.hasUser(goodUser));
+            assertEquals(PolicyFailure.ILLEGAL_EMAIL, e.getFailure());
+        }
+        // test that invalid screen name fails policy
+        try {
+            ud.addUser(goodUser, good, bad, good);
+            removeUserLater(goodUser);
+            // exception expected
+            fail("Failed to throw a PolicyFailureException");
+        } catch (PolicyFailureException e) {
+            assertFalse(ud.hasUser(goodUser));
+            assertEquals(PolicyFailure.ILLEGAL_SCREEN_NAME, e.getFailure());
+        }
+        // test that invalid screen name fails policy
+        try {
+            ud.addUser(goodUser, good, good, bad);
+            removeUserLater(goodUser);
+            // exception expected
+            fail("Failed to throw a PolicyFailureException");
+        } catch (PolicyFailureException e) {
+            assertFalse(ud.hasUser(good));
+            assertEquals(PolicyFailure.ILLEGAL_PASSWORD, e.getFailure());
+        }
+    }
+
+    /**
+     * Tests the authenticateUserDetailed() method.
+     */
+    @Test
+    public void testAuthenticateUserDetailed() throws ConnectionFailureException {
+        UserDirectory ud = create();
+
+        // create user
+        String user = username();
+        String pass = "pass";
+        try {
+            ud.addUser(user, "foo", "bar", pass);
+            removeUserLater(user);
+        } catch (UserAlreadyExistsException | PolicyFailureException e) {
+            // unexpected exception
+            fail("Unexpected Exception");
+        }
+
+        // test when user doesn't exist
+        assertEquals(Authentication.INVALID_USERNAME, ud.authenticateUserDetailed(username()+"thisshoudn'texist", "pass"));
+
+        // test when password is wrong
+        assertEquals(Authentication.INVALID_PASSWORD, ud.authenticateUserDetailed(user, "wrong-pass"));
+
+        // test when valid
+        assertEquals(Authentication.VALID, ud.authenticateUserDetailed(user, pass));
+    }
+
+    private void removeUserLater(String username) {
+        usersToRemove.add(username);
     }
 }
